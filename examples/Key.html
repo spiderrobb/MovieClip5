@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Key Object Example</title>
+		<script type="text/javascript" src="../src/Key.js"></script>
+		<style>
+			#output {
+				width:500px;
+				height:500px;
+				overflow:auto;
+				margin:10px;
+				border: 1px solid #aaa;
+				background:#eee;
+				border-radius:3px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="output"></div>
+		<script type="text/javascript">
+			function scrollDown() {
+				document.getElementById('output').scrollTop = document.getElementById('output').scrollHeight;
+			};
+			Key.onKeyDown = function() {
+				document.getElementById('output').innerHTML += Key.getCode()+' Key was pressed. <br>';
+				scrollDown();
+			};
+			Key.onKeyUp = function() {
+				document.getElementById('output').innerHTML += Key.getCode()+' Key was released. <br>';
+				scrollDown();
+			};
+		</script>
+	</body>
+</html>
