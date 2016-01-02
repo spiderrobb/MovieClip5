@@ -17,27 +17,27 @@
  *                    rotation    : _rotation    - of graphic and children
  *                    alpha       : _alpha       - of graphic and children
  *                    depth       : _depth       - of graphic and children
- *                    visible     : _visible     - boolean 
+ *                    visible     : _visible     - boolean
  *                    graphic     : _graphic     - graphic type
  *                    graphicArgs : _graphicArgs - graphic specific options
- *					  onEnterFrame: onEnterFrame - function called every time render is called
+ *                    onEnterFrame: onEnterFrame - function called every time render is called
  * @return void
  */
 MovieClip.prototype = Object.create(DisplayObject.prototype);
 function MovieClip(args){
-	var args             = args || {};
+	args                 = args || {};
 	this._children       = [];
 	this._tweens         = [];
 	this._uniqueID       = MovieClip.objectCount++;
-	this._name           = args['name'] || MovieClip.getUniqueName(this._uniqueID);
+	this._name           = args.name || MovieClip.getUniqueName(this._uniqueID);
 	this._parent         = null;
 	// functions
 	//this.onMouseMove     = args['onMouseMove'] || null;
 	//this.onMouseDown     = args['onMouseDown'] || null;
 	//this.onMouseUp       = args['onMouseUp'] || null;
 	//this.onMouseOver     = args['onMouseOver'] || null;
-	this.onEnterFrame    = args['onEnterFrame'] || null;
-	this.init            = args['init'] || null;
+	this.onEnterFrame    = args.onEnterFrame || null;
+	this.init            = args.init || null;
 	// parent constructor
 	DisplayObject.call(this,args);
 	if (this.init !== null) {
@@ -48,7 +48,7 @@ function MovieClip(args){
  * this static variable should not be used or modifed
  * outside the MovieClip object
  */
-MovieClip.objectCount   = 0;
+MovieClip.objectCount = 0;
 /**
  * this function returns a unique string name evertyime
  * @return string
@@ -82,7 +82,7 @@ MovieClip.prototype.addChild = function(mc) {
  */
 MovieClip.prototype.addTween = function(tween) {
 	this._tweens.push(tween);
-}
+};
 /**
  * this function removes the mc MovieClip from this MovieClip
  * @param MovieClip mc MovieClip to remove
@@ -141,7 +141,7 @@ MovieClip.prototype.tickLogic = function() {
 	this._children.forEach(function(mc) {
 		mc.tickLogic();
 	});
-	
+
 	// running on enter frame if exists
 	if (this.onEnterFrame) {
 		this.onEnterFrame();

@@ -27,16 +27,16 @@ var Key = {
 	_state : {},
 	_lastKeyCode: null,
 	_onPress: function(event) {
-		if (Key._state[event.keyCode] == undefined) {
+		if (Key._state[event.keyCode] === undefined) {
 			Key._lastKeyCode = event.keyCode;
-			if (Key.onKeyDown != null) Key.onKeyDown();
+			if (Key.onKeyDown !== null) Key.onKeyDown();
 		}
 		Key._state[event.keyCode] = true;
 	},
 	_onRelease: function(event) {
 		if (Key._state[event.keyCode]) {
 			Key._lastKeyCode = event.keyCode;
-			if (Key.onKeyUp != null) Key.onKeyUp();
+			if (Key.onKeyUp !== null) Key.onKeyUp();
 			delete Key._state[event.keyCode];
 		}
 	},

@@ -28,14 +28,15 @@ ResourceLoader.prototype.loadImage = function(key, url, callback) {
  * @return void
  */
 ResourceLoader.prototype.loadImages = function(images, callback) {
-	var self = this;
-	for (var i in images) {
-		self._totalResources++;
-		self.loadImage(i, images[i], function(){
+	var self = this,
+		imageLoaded = function() {
 			self._loadedResources++;
 			if (callback) {
 				callback(self._totalResources, self._loadedResources);
 			}
-		});
+		};
+	for (var i in images) {
+		self._totalResources++;
+		self.loadImage(i, images[i], imageLoaded);
 	}
 };

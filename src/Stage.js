@@ -2,7 +2,6 @@ Stage.prototype = Object.create(MovieClip.prototype);
 function Stage(canvas_id, args) {
 	// private vars
 	var self       = this,
-		_rAF       = window.requestAnimationFrame,
 		_width     = 500,
 		_height    = 500,
 		_frameRate = 24,
@@ -63,7 +62,7 @@ function Stage(canvas_id, args) {
 		});
 	};
 	_resize = function() {
-		// updating display 
+		// updating display
 		_updateDisplay();
 
 		// calling resize function
@@ -153,21 +152,23 @@ function Stage(canvas_id, args) {
 				break;
 			}
 		}
-	}
+	};
 	this.play           = function() {
 		if (!_isPlaying()) {
-			_interval = setInterval(_render, Math.round(1000/_frameRate));
+			_interval = setInterval(function() {
+				window.requestAnimationFrame(_render);
+			}, Math.round(1000/_frameRate));
 		}
-	}
+	};
 	this.stop           = function() {
 		if (_isPlaying()) {
 			clearInterval(_interval);
 			_interval = null;
 		}
-	}
+	};
 
 	// init extended class
-	args['_graphic'] = 'stage';
+	args._graphic = 'stage';
 	MovieClip.call(this, args);
 	window.addEventListener('resize', _resize);
 	//_canvas.addEventListener('mousemove', _mouseMove);

@@ -5,13 +5,13 @@
  */
 function Tween(opts, callback) {
 	// setting up varibles
-	this.target        = opts['target'];
-	this.start         = opts['start'] || {};
-	this.end           = opts['end'] || false;
-	this.frames        = opts['frames'] || 1;
-	this.type          = opts['type'] || 'linearTween';
+	this.target        = opts.target;
+	this.start         = opts.start || {};
+	this.end           = opts.end || false;
+	this.frames        = opts.frames || 1;
+	this.type          = opts.type || 'linearTween';
 	this.current_frame = 0;
-	this.callback      = callback == undefined ? null : callback;
+	this.callback      = callback === undefined ? null : callback;
 	this.ratio         = 0;
 
 	// looping through and populating start if not specified
@@ -86,4 +86,4 @@ Tween.prototype.linearTween = function(t,b,c,d) {
  */
 Tween.prototype.easeInOutSine = function (t, b, c, d) {
 	return -c/2 * (Math.cos(Math.PI*t/d) - 1) + b;
-}
+};
