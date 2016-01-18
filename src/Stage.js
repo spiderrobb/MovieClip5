@@ -1,15 +1,16 @@
 Stage.prototype = Object.create(MovieClip.prototype);
 function Stage(canvas_id, args) {
 	// private vars
+	args           = args || {};
 	var self       = this,
 		_width     = 500,
 		_height    = 500,
-		_frameRate = 24,
+		_frameRate = args.frameRate || 24,
 		_listeners = [],
 		_interval  = null,
 		_canvas    = document.getElementById(canvas_id),
 		_context   = _canvas.getContext('2d'),
-		_displayState = 'fit',
+		_displayState = args.displayState || 'fit',
 	// private function declarations
 		_fullScreen,
 		_resize,
@@ -57,7 +58,7 @@ function Stage(canvas_id, args) {
 		self.onFullScreen();
 		_listeners.forEach(function(listener){
 			if (listener.onFullScreen) {
-				self.onFullScreen();
+				listener.onFullScreen();
 			}
 		});
 	};
@@ -71,7 +72,7 @@ function Stage(canvas_id, args) {
 		// checing listeners
 		_listeners.forEach(function(listener){
 			if (listener.onResize) {
-				self.onResize();
+				listener.onResize();
 			}
 		});
 	};

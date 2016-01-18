@@ -20,32 +20,8 @@
 		<canvas id="canvas1"></canvas>
 		<script type="text/javascript">
 			var stage = new Stage('canvas1', {_width: 500, _height: 500});
-			stage.displayState = 'stretch'
+			stage.displayState = 'stretch';
 			new ParticleGenerator(stage, 500);
-			/*
-			var width = 100;
-			for(var i = 1; i<=9; i++) {
-				for (var j = 1; j<=9; j++) {
-					stage.addChild(new MovieClip({
-						_x: i*50,
-						_y: j*50,
-						_originX: -width/2,
-						_originY: -width/2,
-						_width: width,
-						_height: width,
-						_graphicArgs : {
-							fillStyle: 'rgb('+(250*(j-i)/10)+','+(250*j/10)+','+(250*(i-j)/10)+')'
-						},
-						_alpha: .5,
-						onEnterFrame: function() {
-							this._rotation += 1;
-							this._scaleX = Math.sin(this._rotation* Math.PI/180);
-							this._scaleY = this._scaleX;
-						}
-					}));
-				}
-			}
-			*/
 			stage.play();
 
 			//ParticleGenerator.prototype = Object.create(MovieClip.prototype);
@@ -67,7 +43,7 @@
 						init: function() {
 							this._x         = self._x;
 							this._y         = self._y;
-							this._alpha     = .1;
+							this._alpha     = .2;
 							this._width     = 1;
 							this._height    = 1;
 							this._yvolocity = -Math.random()*self._maxYVolocity;

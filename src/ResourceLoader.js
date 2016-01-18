@@ -32,7 +32,7 @@ ResourceLoader.prototype.loadImages = function(images, callback) {
 		imageLoaded = function() {
 			self._loadedResources++;
 			if (callback) {
-				callback(self._totalResources, self._loadedResources);
+				callback(self._totalResources, self._loadedResources, this);
 			}
 		};
 	for (var i in images) {

@@ -29,7 +29,7 @@ function MovieClip(args){
 	this._children       = [];
 	this._tweens         = [];
 	this._uniqueID       = MovieClip.objectCount++;
-	this._name           = args.name || MovieClip.getUniqueName(this._uniqueID);
+	this._name           = args._name || MovieClip.getUniqueName(this._uniqueID);
 	this._parent         = null;
 	// functions
 	//this.onMouseMove     = args['onMouseMove'] || null;
