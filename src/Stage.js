@@ -16,7 +16,8 @@ function Stage(canvas_id, args) {
 		_resize,
 		_updateDisplay,
 		_isPlaying,
-		_render;
+		_render,
+		_mouseMove;
 
 	// public read only vars
 	Object.defineProperty(this, 'width', {
@@ -129,19 +130,29 @@ function Stage(canvas_id, args) {
 			self._scaleY = 1;
 		}
 	};
-	// _mouseMove = function(e) {
-	// 	var myEvent = {
-	// 		x: e.offsetX,
-	// 		y: e.offsetY,
-	// 		movementX: e.movementX,
-	// 		movementY: e.movementY
-	// 	};
-	// 	//console.log(myEvent);
-	// };
+	_mouseMove = function(e) {
+		// building a simple generic object that represents the mouse move event
+		var mouseEvent = {
+			x: e.offsetX,
+			y: e.offsetY,
+			movementX: e.movementX,
+			movementY: e.movementY
+		};
+		// calling mouse move function
+		this.onMouseMove(mouseEvent);
+
+		// checing listeners
+		_listeners.forEach(function(listener){
+			if (listener.onMouseMove) {
+				listener.onMouseMove(mouseEvent);
+			}
+		});
+	};
 
 	// public functions
 	this.onFullScreen   = function(){};
 	this.onResize       = function(){};
+	this.onMouseMove    = function(event){};
 	this.addListener    = function(listener) {
 		_listeners.push(listener);
 	};
@@ -172,6 +183,6 @@ function Stage(canvas_id, args) {
 	args._graphic = 'stage';
 	MovieClip.call(this, args);
 	window.addEventListener('resize', _resize);
-	//_canvas.addEventListener('mousemove', _mouseMove);
+	_canvas.addEventListener('mousemove', _mouseMove);
 	_resize();
 }
