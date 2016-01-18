@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Stage Object Example</title>
+		<script type="text/javascript" src="../src/DisplayObject.js"></script>
+		<script type="text/javascript" src="../src/MovieClip.js"></script>
+		<script type="text/javascript" src="../src/Stage.js"></script>
+		<style>
+			#canvas1 {
+				position:absolute;
+				top:0px;
+				left:0px;
+				height:100%;
+				width:100%;
+				background-color:#000;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="canvas1"></canvas>
+		<script type="text/javascript">
+			var stage = new Stage('canvas1', {_width: 500, _height: 500});
+			stage.displayState = 'stretch';
+			new ParticleGenerator(stage, 500);
+			stage.play();
+
+			//ParticleGenerator.prototype = Object.create(MovieClip.prototype);
+			function ParticleGenerator(mc, fall) {
+				var self = this;
+				this._x = 250;
+				this._y = 100;
+				this._gravity = 2;
+				this._maxYVolocity = 20;
+				this._maxXVolocity = 10;
+				this._particles = 100;
+				for(var i = 0; i<this._particles; i++) {
+					mc.addChild(new MovieClip({
+						_graphic: 'ellipse',
+						_graphicArgs: {
+							fillStyle: '#69D2E7',
+							strokeStyle: '#A7DBD8'
+						},
+						init: function() {
+							this._x         = self._x;
+							this._y         = self._y;
+							this._alpha     = .2;
+							this._width     = 1;
+							this._height    = 1;
+							this._yvolocity = -Math.random()*self._maxYVolocity;
+							this._xvolocity = 2*Math.random()*self._maxXVolocity-self._maxXVolocity;
+						},
+						onEnterFrame: function() {
+							this._y += this._yvolocity;
+							this._x += this._xvolocity;
+							this._yvolocity += self._gravity;
+							this._alpha *= 1.05;
+							this._width *= 1.1;
+							this._height *= 1.1;
+							if (this._y > fall) {
+								this.init();
+							}
+						}
+					}));
+				}
+			}
+		</script>
+	</body>
+</html>
