@@ -143,13 +143,8 @@ MovieClip.prototype.tickLogic = function() {
 	});
 
 	// running on enter frame if exists
-	if (this.onEnterFrame) {
-		this.onEnterFrame();
-	}
+	this.trigger('onEnterFrame', null);
 };
-// MovieClip.prototype.tickEvents   = function(ctx) {
-// 	// maybe?
-// };
 MovieClip.prototype.tickGraphics = function(ctx) {
 	// sorting children for graphical display
 	this._children.sort(this.depthCompare);

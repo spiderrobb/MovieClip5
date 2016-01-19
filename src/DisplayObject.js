@@ -1,3 +1,4 @@
+DisplayObject.prototype = Object.create(EventObject.prototype);
 function DisplayObject(args) {
 	args             = args || {};
 	// MovieClip Position on canvas
@@ -29,6 +30,8 @@ function DisplayObject(args) {
 	this._graphicArgs    = args._graphicArgs || {};
 	// image smoothing
 	this._smoothImage    = args._smoothImage || 'inherit';
+	// call parent constructor
+	EventObject.call(this);
 }
 DisplayObject.prototype.applyContext = function(ctx){
 	// applying alpha

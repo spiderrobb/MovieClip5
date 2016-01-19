@@ -6,13 +6,11 @@ function Stage(canvas_id, args) {
 		_width     = 500,
 		_height    = 500,
 		_frameRate = args.frameRate || 24,
-		_listeners = [],
 		_interval  = null,
 		_canvas    = document.getElementById(canvas_id),
 		_context   = _canvas.getContext('2d'),
 		_displayState = args.displayState || 'fit',
 	// private function declarations
-		_fullScreen,
 		_resize,
 		_updateDisplay,
 		_isPlaying,
@@ -54,28 +52,10 @@ function Stage(canvas_id, args) {
 		}
 	});
 
-	// private functions
-	_fullScreen = function() {
-		self.onFullScreen();
-		_listeners.forEach(function(listener){
-			if (listener.onFullScreen) {
-				listener.onFullScreen();
-			}
-		});
-	};
 	_resize = function() {
 		// updating display
 		_updateDisplay();
-
-		// calling resize function
-		self.onResize();
-
-		// checing listeners
-		_listeners.forEach(function(listener){
-			if (listener.onResize) {
-				listener.onResize();
-			}
-		});
+		self.trigger('onResize', null);
 	};
 	_isPlaying = function() {
 		return _interval !== null;
@@ -138,33 +118,15 @@ function Stage(canvas_id, args) {
 			movementX: e.movementX,
 			movementY: e.movementY
 		};
-		// calling mouse move function
-		this.onMouseMove(mouseEvent);
-
-		// checing listeners
-		_listeners.forEach(function(listener){
-			if (listener.onMouseMove) {
-				listener.onMouseMove(mouseEvent);
-			}
-		});
+		// triggering event
+		self.trigger('onMouseMove', mouseEvent);
 	};
 
 	// public functions
-	this.onFullScreen   = function(){};
-	this.onResize       = function(){};
-	this.onMouseMove    = function(event){};
-	this.addListener    = function(listener) {
-		_listeners.push(listener);
-	};
-	this.removeListener = function(listener) {
-		for (var i in this._listeners) {
-			if (this._listeners[i] == listener) {
-				delete this._listeners[i];
-				this._listeners.splice(i,1);
-				break;
-			}
-		}
-	};
+	this.onFullScreen   = null;
+	this.onResize       = null;
+	this.onMouseMove    = null;
+
 	this.play           = function() {
 		if (!_isPlaying()) {
 			_interval = setInterval(function() {
