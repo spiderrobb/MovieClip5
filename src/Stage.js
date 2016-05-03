@@ -6,16 +6,12 @@ function Stage(canvas_id, args) {
 		_width     = 500,
 		_height    = 500,
 		_frameRate = args.frameRate || 24,
-		_listeners = [],
 		_interval  = null,
 		_canvas    = document.getElementById(canvas_id),
 		_context   = _canvas.getContext('2d'),
 		_displayState = args.displayState || 'fit',
 	// private function declarations
-		_fullScreen,
-		_resize,
 		_updateDisplay,
-		_isPlaying,
 		_render;
 
 	// public read only vars
@@ -36,7 +32,7 @@ function Stage(canvas_id, args) {
 		set: function(fps) {
 			if (fps !== _frameRate) {
 				_frameRate = fps;
-				if (_isPlaying()) {
+				if (self.isPlaying()) {
 					self.stop();
 					self.play();
 				}
@@ -53,34 +49,12 @@ function Stage(canvas_id, args) {
 		}
 	});
 
-	// private functions
-	_fullScreen = function() {
-		self.onFullScreen();
-		_listeners.forEach(function(listener){
-			if (listener.onFullScreen) {
-				listener.onFullScreen();
-			}
-		});
-	};
-	_resize = function() {
+	function _resize() {
 		// updating display
 		_updateDisplay();
-
-		// calling resize function
-		self.onResize();
-
-		// checing listeners
-		_listeners.forEach(function(listener){
-			if (listener.onResize) {
-				listener.onResize();
-			}
-		});
-	};
-	_isPlaying = function() {
-		return _interval !== null;
-	};
+		self.trigger('onResize', null);
+	}
 	_render = function() {
-		//window.requestAnimationFrame(_render);
 		// run logic
 		self.tickLogic();
 
@@ -129,42 +103,28 @@ function Stage(canvas_id, args) {
 			self._scaleY = 1;
 		}
 	};
-	// _mouseMove = function(e) {
-	// 	var myEvent = {
-	// 		x: e.offsetX,
-	// 		y: e.offsetY,
-	// 		movementX: e.movementX,
-	// 		movementY: e.movementY
-	// 	};
-	// 	//console.log(myEvent);
-	// };
 
 	// public functions
-	this.onFullScreen   = function(){};
-	this.onResize       = function(){};
-	this.addListener    = function(listener) {
-		_listeners.push(listener);
-	};
-	this.removeListener = function(listener) {
-		for (var i in this._listeners) {
-			if (this._listeners[i] == listener) {
-				delete this._listeners[i];
-				this._listeners.splice(i,1);
-				break;
-			}
-		}
-	};
+	this.onResize       = null;
+	this.onBlur         = null;
+	this.onFocus        = null;
+
 	this.play           = function() {
-		if (!_isPlaying()) {
+		if (!self.isPlaying()) {
 			_interval = setInterval(function() {
 				window.requestAnimationFrame(_render);
 			}, Math.round(1000/_frameRate));
 		}
 	};
+	this.isPlaying      = function() {
+		return _interval !== null;
+	};
 	this.stop           = function() {
-		if (_isPlaying()) {
+		if (self.isPlaying()) {
 			clearInterval(_interval);
 			_interval = null;
+			// render new graphics
+			self.tickGraphics(_context);
 		}
 	};
 
@@ -172,6 +132,33 @@ function Stage(canvas_id, args) {
 	args._graphic = 'stage';
 	MovieClip.call(this, args);
 	window.addEventListener('resize', _resize);
-	//_canvas.addEventListener('mousemove', _mouseMove);
+
+	// setting up handler for mouseMove
+	_canvas.addEventListener('mousemove', function(e) {
+		// triggering event
+		self.trigger('onMouseMove', {
+			x: e.offsetX,
+			y: e.offsetY,
+			movementX: e.movementX,
+			movementY: e.movementY
+		});
+	});
+	_canvas.addEventListener('click', function(e) {
+		// triggering event
+		self.trigger('onClick', {
+			x: e.offsetX,
+			y: e.offsetY
+		});
+	});
+	// setting up handler for blur
+	window.addEventListener('blur', function(e) {
+		// trigger blur events
+		self.trigger('onBlur', null);
+	});
+	// setting up handler for focus
+	window.addEventListener('focus', function(e) {
+		// trigger focus events
+		self.trigger('onFocus', null);
+	});
 	_resize();
 }

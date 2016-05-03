@@ -37,6 +37,8 @@ function MovieClip(args){
 	//this.onMouseUp       = args['onMouseUp'] || null;
 	//this.onMouseOver     = args['onMouseOver'] || null;
 	this.onEnterFrame    = args.onEnterFrame || null;
+	this.onMouseMove     = args.onMouseMove || null;
+	this.onClick         = args.onClick || null;
 	this.init            = args.init || null;
 	// parent constructor
 	DisplayObject.call(this,args);
@@ -143,13 +145,8 @@ MovieClip.prototype.tickLogic = function() {
 	});
 
 	// running on enter frame if exists
-	if (this.onEnterFrame) {
-		this.onEnterFrame();
-	}
+	this.trigger('onEnterFrame', null);
 };
-// MovieClip.prototype.tickEvents   = function(ctx) {
-// 	// maybe?
-// };
 MovieClip.prototype.tickGraphics = function(ctx) {
 	// sorting children for graphical display
 	this._children.sort(this.depthCompare);
