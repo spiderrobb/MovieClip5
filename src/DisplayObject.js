@@ -23,31 +23,59 @@ function DisplayObject(args) {
 	// MovieClip Depth Highest number wins
 	this._depth          = args._depth !== undefined ? args._depth : 1;
 	// MovieClip Bisibility, onEnterFrame will still get called
-	this._visible        = args._visible || true;
+	this._visible        = args._visible !== undefined ? args._visible :  true;
 	// Graphic type
 	this._graphic        = args._graphic || 'rectangle';
 	// graphic options
 	this._graphicArgs    = args._graphicArgs || {};
 	// image smoothing
 	this._smoothImage    = args._smoothImage || 'inherit';
+	// variable for transform
+	this.__t   = document.createElementNS("http://www.w3.org/2000/svg", "svg").createSVGMatrix();
 	// call parent constructor
 	EventObject.call(this);
 }
 DisplayObject.prototype.applyContext = function(ctx){
-	// applying alpha
+		// applying alpha
 	if (this._alpha !== 1) ctx.globalAlpha *= this._alpha;
-	// applying x y coordinates
-	if (this._x !== 0 || this._y !== 0) ctx.translate(this._x, this._y);
-	// applying scaling
-	if (this._scaleX !== 1 || this._scaleY !== 1) ctx.scale(this._scaleX, this._scaleY);
-	// applying rotation
-	if (this._rotation !== 0) ctx.rotate(this._rotation * Math.PI/180);
-	// skew
-	if (this._skewX !== 0 || this._skewY !== 0) ctx.transform(1, this._skewX, this._skewY, 1, 0, 0);
-	// applying origin shift
-	if (this._originX !== 0 || this._originY !== 0) ctx.translate(this._originX, this._originY);
-	// applying image smoothing
+		// applying image smoothing
 	if (this._smoothImage !== 'inherit') ctx.imageSmoothingEnabled = this._smoothImage;
+	// init transform
+	this.__t.a = 1;
+	this.__t.b = 0;
+	this.__t.c = 0;
+	this.__t.d = 1;
+	this.__t.e = 0;
+	this.__t.f = 0;
+	// applying x y coordinates
+	if (this._x !== 0 || this._y !== 0) this.__t = this.__t.translate(this._x, this._y);
+	// applying scaling
+	if (this._scaleX !== 1 || this._scaleY !== 1) this.__t = this.__t.scaleNonUniform(this._scaleX, this._scaleY);
+	// applying rotation
+	if (this._rotation !== 0) this.__t = this.__t.rotate(this._rotation);
+	// skew
+	if (this._skewX !== 0) this.__t = this.__t.skewX(this._skewX);
+	if (this._skewY !== 0) this.__t = this.__t.skewY(this._skewY)
+	// applying origin shift
+	if (this._originX !== 0 || this._originY !== 0) this.__t = this.__t.translate(this._originX, this._originY);
+	// apply transform to ctx
+	ctx.transform(
+		this.__t.a,
+		this.__t.b,
+		this.__t.c,
+		this.__t.d,
+		this.__t.e,
+		this.__t.f
+	);
+};
+DisplayObject.prototype.trigger = function(type, event) {
+	// todo add rotation and skew?
+	if (event !== undefined && event !== null) {
+		//this.__t = this.__t.inverse();
+		event.x = (event.x-this.__t.e)/this.__t.a;
+		event.y = (event.y-this.__t.f)/this.__t.d;
+	}
+	EventObject.prototype.trigger.call(this, type, event);
 };
 /**
  * this function is responsible for the graphical

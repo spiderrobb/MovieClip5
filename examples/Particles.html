@@ -18,22 +18,52 @@
 		<canvas id="canvas1"></canvas>
 		<script type="text/javascript">
 			var stage = new Stage('canvas1', {_width: 500, _height: 500});
-			stage.displayState = 'stretch';
-			new ParticleGenerator(stage, 500);
+			stage.addChild(new MovieClip({
+				_name: 'paused_text',
+				_graphic: 'text',
+				_visible: false,
+				_graphicArgs: {
+					font: '50px sarif',
+					fillStyle: '#fff',
+					text: '=) Paused =)',
+					textAlign: 'center',
+					textBaseline: 'middle'
+				}
+			}));
+			stage.displayState = 'dynamic';
+			new ParticleGenerator(stage);
+			stage.onBlur = function(e) {
+				stage.paused_text._x = stage._width/2;
+				stage.paused_text._y = stage._height/2;
+				stage.paused_text._visible = true;
+				stage.stop();
+			};
+			stage.onFocus = function(e) {
+				stage.paused_text._visible = false;
+				stage.play();
+			}
 			stage.play();
 
 			//ParticleGenerator.prototype = Object.create(MovieClip.prototype);
-			function ParticleGenerator(mc, fall) {
+			function ParticleGenerator(mc) {
 				var self = this;
 				this._x = 250;
 				this._y = 100;
 				this._gravity = 2;
 				this._maxYVolocity = 20;
 				this._maxXVolocity = 10;
-				this._particles = 100;
+				this._particles = 300;
+				this.onMouseMove = function(e) {
+					this._x = e.x;
+					this._y = e.y;
+				};
+				this.onClick = function(e) {
+					console.log(e);
+				};
+				mc.addListener(this);
 				for(var i = 0; i<this._particles; i++) {
 					mc.addChild(new MovieClip({
-						_graphic: 'ellipse',
+						_graphic: 'rectangle',
 						_graphicArgs: {
 							fillStyle: '#69D2E7',
 							strokeStyle: '#A7DBD8'
@@ -41,7 +71,7 @@
 						init: function() {
 							this._x         = self._x;
 							this._y         = self._y;
-							this._alpha     = .2;
+							this._alpha     = 0.3;
 							this._width     = 1;
 							this._height    = 1;
 							this._yvolocity = -Math.random()*self._maxYVolocity;
@@ -51,12 +81,13 @@
 							this._y += this._yvolocity;
 							this._x += this._xvolocity;
 							this._yvolocity += self._gravity;
-							this._alpha *= 1.05;
+							this._alpha *= 1.02;
 							this._width *= 1.1;
 							this._height *= 1.1;
-							if (this._y > fall) {
+							if (this._y > mc._height) {
 								this.init();
 							}
+							this._rotation += 30;
 						}
 					}));
 				}

@@ -11,11 +11,8 @@ function Stage(canvas_id, args) {
 		_context   = _canvas.getContext('2d'),
 		_displayState = args.displayState || 'fit',
 	// private function declarations
-		_resize,
 		_updateDisplay,
-		_isPlaying,
-		_render,
-		_mouseMove;
+		_render;
 
 	// public read only vars
 	Object.defineProperty(this, 'width', {
@@ -35,7 +32,7 @@ function Stage(canvas_id, args) {
 		set: function(fps) {
 			if (fps !== _frameRate) {
 				_frameRate = fps;
-				if (_isPlaying()) {
+				if (self.isPlaying()) {
 					self.stop();
 					self.play();
 				}
@@ -52,16 +49,12 @@ function Stage(canvas_id, args) {
 		}
 	});
 
-	_resize = function() {
+	function _resize() {
 		// updating display
 		_updateDisplay();
 		self.trigger('onResize', null);
-	};
-	_isPlaying = function() {
-		return _interval !== null;
-	};
+	}
 	_render = function() {
-		//window.requestAnimationFrame(_render);
 		// run logic
 		self.tickLogic();
 
@@ -110,34 +103,28 @@ function Stage(canvas_id, args) {
 			self._scaleY = 1;
 		}
 	};
-	_mouseMove = function(e) {
-		// building a simple generic object that represents the mouse move event
-		var mouseEvent = {
-			x: e.offsetX,
-			y: e.offsetY,
-			movementX: e.movementX,
-			movementY: e.movementY
-		};
-		// triggering event
-		self.trigger('onMouseMove', mouseEvent);
-	};
 
 	// public functions
-	this.onFullScreen   = null;
 	this.onResize       = null;
-	this.onMouseMove    = null;
+	this.onBlur         = null;
+	this.onFocus        = null;
 
 	this.play           = function() {
-		if (!_isPlaying()) {
+		if (!self.isPlaying()) {
 			_interval = setInterval(function() {
 				window.requestAnimationFrame(_render);
 			}, Math.round(1000/_frameRate));
 		}
 	};
+	this.isPlaying      = function() {
+		return _interval !== null;
+	};
 	this.stop           = function() {
-		if (_isPlaying()) {
+		if (self.isPlaying()) {
 			clearInterval(_interval);
 			_interval = null;
+			// render new graphics
+			self.tickGraphics(_context);
 		}
 	};
 
@@ -145,6 +132,33 @@ function Stage(canvas_id, args) {
 	args._graphic = 'stage';
 	MovieClip.call(this, args);
 	window.addEventListener('resize', _resize);
-	_canvas.addEventListener('mousemove', _mouseMove);
+
+	// setting up handler for mouseMove
+	_canvas.addEventListener('mousemove', function(e) {
+		// triggering event
+		self.trigger('onMouseMove', {
+			x: e.offsetX,
+			y: e.offsetY,
+			movementX: e.movementX,
+			movementY: e.movementY
+		});
+	});
+	_canvas.addEventListener('click', function(e) {
+		// triggering event
+		self.trigger('onClick', {
+			x: e.offsetX,
+			y: e.offsetY
+		});
+	});
+	// setting up handler for blur
+	window.addEventListener('blur', function(e) {
+		// trigger blur events
+		self.trigger('onBlur', null);
+	});
+	// setting up handler for focus
+	window.addEventListener('focus', function(e) {
+		// trigger focus events
+		self.trigger('onFocus', null);
+	});
 	_resize();
 }

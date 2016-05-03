@@ -21,4 +21,4 @@ EventObject.prototype.removeListener = function(listener) {
 			break;
 		}
 	}
-}
+};

@@ -37,6 +37,8 @@ function MovieClip(args){
 	//this.onMouseUp       = args['onMouseUp'] || null;
 	//this.onMouseOver     = args['onMouseOver'] || null;
 	this.onEnterFrame    = args.onEnterFrame || null;
+	this.onMouseMove     = args.onMouseMove || null;
+	this.onClick         = args.onClick || null;
 	this.init            = args.init || null;
 	// parent constructor
 	DisplayObject.call(this,args);
