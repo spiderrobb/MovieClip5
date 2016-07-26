@@ -17,7 +17,7 @@ function DisplayObject(args) {
 	this._skewX          = args._skewX !== undefined ? args._skewX : 0;
 	this._skewY          = args._skewY !== undefined ? args._skewY : 0;
 	// MovieClip Rotation
-	this._rotation       = args.args_rotation !== undefined ? args._rotation : 0;
+	this._rotation       = args._rotation !== undefined ? args._rotation : 0;
 	// MovieClip opacity
 	this._alpha          = args._alpha !== undefined ? args._alpha : 1;
 	// MovieClip Depth Highest number wins
@@ -32,6 +32,7 @@ function DisplayObject(args) {
 	this._smoothImage    = args._smoothImage || 'inherit';
 	// variable for transform
 	this.__t   = document.createElementNS("http://www.w3.org/2000/svg", "svg").createSVGMatrix();
+	this.__ti  = this.__t.inverse();
 	// call parent constructor
 	EventObject.call(this);
 }
@@ -55,7 +56,7 @@ DisplayObject.prototype.applyContext = function(ctx){
 	if (this._rotation !== 0) this.__t = this.__t.rotate(this._rotation);
 	// skew
 	if (this._skewX !== 0) this.__t = this.__t.skewX(this._skewX);
-	if (this._skewY !== 0) this.__t = this.__t.skewY(this._skewY)
+	if (this._skewY !== 0) this.__t = this.__t.skewY(this._skewY);
 	// applying origin shift
 	if (this._originX !== 0 || this._originY !== 0) this.__t = this.__t.translate(this._originX, this._originY);
 	// apply transform to ctx
@@ -67,13 +68,20 @@ DisplayObject.prototype.applyContext = function(ctx){
 		this.__t.e,
 		this.__t.f
 	);
+	this.__ti = this.__t.inverse();
 };
 DisplayObject.prototype.trigger = function(type, event) {
 	// todo add rotation and skew?
-	if (event !== undefined && event !== null) {
-		//this.__t = this.__t.inverse();
-		event.x = (event.x-this.__t.e)/this.__t.a;
-		event.y = (event.y-this.__t.f)/this.__t.d;
+	if (event !== undefined 
+		&& event !== null 
+		&& event.type !== undefined 
+		&& event.type == 'mouse'
+	) {
+		event.parentX = event.x;
+		event.parentY = event.y;
+		event.target  = this._name;
+		event.x = this.__ti.a*event.parentX + this.__ti.c*event.parentY + this.__ti.e;
+		event.y = this.__ti.b*event.parentX + this.__ti.d*event.parentY + this.__ti.f;
 	}
 	EventObject.prototype.trigger.call(this, type, event);
 };

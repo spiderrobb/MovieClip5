@@ -2,6 +2,7 @@ Stage.prototype = Object.create(MovieClip.prototype);
 function Stage(canvas_id, args) {
 	// private vars
 	args           = args || {};
+	args._name     = 'stage';
 	var self       = this,
 		_width     = 500,
 		_height    = 500,
@@ -55,14 +56,24 @@ function Stage(canvas_id, args) {
 		self.trigger('onResize', null);
 	}
 	_render = function() {
-		// run logic
-		self.tickLogic();
+		// run logic for tweens and such
+		self.trigger('tickLogic', null, true);
 
+		// calling on enter frame
+		self.trigger('onEnterFrame', null, true);
+
+		// triggering mouse events
+		if (Mouse.move) self.trigger('onMouseMove', Mouse.event);
+		if (Mouse.down) self.trigger('onMouseDown', Mouse.event);
+		if (Mouse.up)   self.trigger('onMouseUp', Mouse.event);
+		Mouse.clear();
+		
 		// clear context
 		_context.clearRect(0, 0, _canvas.width, _canvas.height);
 
 		// render new graphics
 		self.tickGraphics(_context);
+		
 	};
 	_updateDisplay = function() {
 		// code for making sure canvas resolution matches dpi
@@ -131,18 +142,34 @@ function Stage(canvas_id, args) {
 	// init extended class
 	args._graphic = 'stage';
 	MovieClip.call(this, args);
+	Mouse.register(_canvas);
+
+	// setting up handler for resize
 	window.addEventListener('resize', _resize);
 
-	// setting up handler for mouseMove
-	_canvas.addEventListener('mousemove', function(e) {
-		// triggering event
-		self.trigger('onMouseMove', {
-			x: e.offsetX,
-			y: e.offsetY,
-			movementX: e.movementX,
-			movementY: e.movementY
-		});
+	// setting up handler for blur
+	window.addEventListener('blur', function(e) {
+		// trigger blur events
+		self.trigger('onBlur', null);
 	});
+
+	// setting up handler for focus
+	window.addEventListener('focus', function(e) {
+		// trigger focus events
+		self.trigger('onFocus', null);
+	});
+
+	// setting up handler for mouseMove
+	// _canvas.addEventListener('mousemove', function(e) {
+	// 	// triggering event
+	// 	self.trigger('onMouseMove', {
+	// 		x: e.offsetX,
+	// 		y: e.offsetY,
+	// 		movementX: e.movementX,
+	// 		movementY: e.movementY
+	// 	});
+	// });
+	/*
 	_canvas.addEventListener('click', function(e) {
 		// triggering event
 		self.trigger('onClick', {
@@ -150,15 +177,6 @@ function Stage(canvas_id, args) {
 			y: e.offsetY
 		});
 	});
-	// setting up handler for blur
-	window.addEventListener('blur', function(e) {
-		// trigger blur events
-		self.trigger('onBlur', null);
-	});
-	// setting up handler for focus
-	window.addEventListener('focus', function(e) {
-		// trigger focus events
-		self.trigger('onFocus', null);
-	});
+	*/
 	_resize();
 }

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>test</title>
+		<script type="text/javascript" src="../src/EventObject.js"></script>
+		<script type="text/javascript" src="../src/DisplayObject.js"></script>
+		<script type="text/javascript" src="../src/MovieClip.js"></script>
+		<script type="text/javascript" src="../src/Stage.js"></script>
+		<script type="text/javascript" src="../src/Key.js"></script>
+		<script type="text/javascript" src="../src/Mouse.js"></script>
+
+		<!-- <script type="text/javascript" src="../build/MovieClip5.min.js"></script> -->
+		<style>
+			#canvas1 {
+				position:absolute;
+				top:0px;
+				left:0px;
+				height:100%;
+				width:100%;
+				background-color:#000;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="canvas1"></canvas>
+		<script type="text/javascript">
+			var stage = new Stage('canvas1', {
+				displayState: 'dynamic', 
+				frameRate:24
+			});
+			stage.addChild(new MovieClip({
+				_name: 'container',
+				onEnterFrame: function() {
+					this._rotation += 1;
+				}
+			}));
+			stage.container.addChild(new MovieClip({
+				_name: 'mouse_pointer',
+				_graphic: 'text',
+				_x: 100,
+				_y: 100,
+				_graphicArgs: {
+					fillStyle: 'white',
+					font: "20px Arial"
+				},
+				onMouseMove: function(e) {
+					console.log(e);
+					this._graphicArgs.text = 'x: '+e.parentX+' y: '+e.parentY;
+					this._x = e.parentX;
+					this._y = e.parentY;
+				}
+			}));
+			stage.play();
+		</script>
+	</body>
+</html>

@@ -129,6 +129,12 @@ MovieClip.prototype.removeChild = function(mc) {
 // 		&& rect1.y < point.y
 // 		&& rect1.height + rect1.y > point.y;
 // };
+MovieClip.prototype.trigger = function(type, event) {
+	DisplayObject.prototype.trigger.call(this, type, event);
+	this._children.forEach(function(mc) {
+		mc.trigger(type, event);
+	});
+};
 MovieClip.prototype.tickLogic = function() {
 	// handling tweens
 	for (var i in this._tweens) {
@@ -136,16 +142,8 @@ MovieClip.prototype.tickLogic = function() {
 		if (this._tweens[i].isComplete()) {
 			delete this._tweens[i];
 			this._tweens.splice(i,1);
-		}
+		}j
 	}
-
-	// running logic tick for all children
-	this._children.forEach(function(mc) {
-		mc.tickLogic();
-	});
-
-	// running on enter frame if exists
-	this.trigger('onEnterFrame', null);
 };
 MovieClip.prototype.tickGraphics = function(ctx) {
 	// sorting children for graphical display
