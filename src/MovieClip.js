@@ -26,19 +26,27 @@
 MovieClip.prototype = Object.create(DisplayObject.prototype);
 function MovieClip(args){
 	args                 = args || {};
-	this._children       = [];
-	this._tweens         = [];
-	this._uniqueID       = MovieClip.objectCount++;
-	this._name           = args._name || MovieClip.getUniqueName(this._uniqueID);
+	this.__children      = [];
+	this.__tweens        = {};
+	this.__mouseOver     = false;
+	this.__prevMouseOver = false;
+	this.__mouseEvent    = null;
+	this.__uniqueID       = MovieClip.objectCount++;
+	this._name           = args._name || MovieClip.getUniqueName(this.__uniqueID);
 	this._parent         = null;
 	// functions
-	//this.onMouseMove     = args['onMouseMove'] || null;
-	//this.onMouseDown     = args['onMouseDown'] || null;
-	//this.onMouseUp       = args['onMouseUp'] || null;
-	//this.onMouseOver     = args['onMouseOver'] || null;
 	this.onEnterFrame    = args.onEnterFrame || null;
+	this.onMouseOver     = args.onMouseOver || null;
+	this.onMouseOut      = args.onMouseOut || null;
 	this.onMouseMove     = args.onMouseMove || null;
-	this.onClick         = args.onClick || null;
+	this.onMouseDown     = args.onMouseDown || null;
+	this.onMouseUp       = args.onMouseUp || null;
+	this.onTouchStart    = args.onTouchStart || null;
+	this.onTouchMove     = args.onTouchMove || null;
+	this.onTouchEnd      = args.onTouchEnd || null;
+	this.onTouchCanceled = args.onTouchCanceled || null;
+	//this.onClick         = args.onClick || null;
+	this.onResize        = args.onResize || null;
 	this.init            = args.init || null;
 	// parent constructor
 	DisplayObject.call(this,args);
@@ -56,15 +64,21 @@ MovieClip.objectCount = 0;
  * @return string
  */
 MovieClip.getUniqueName = function(id){
-	var name = 'movieclip'+id;
-	return name;
+	return 'movieclip'+id;
 };
 /**
  * this function is used for sorting depth of MovieClips
  * @return numeric
  */
 MovieClip.prototype.depthCompare = function(a,b){
-	return a._depth == b._depth ? a._uniqueID - b._uniqueID : a._depth-b._depth;
+	return a._depth == b._depth ? a.__uniqueID - b.__uniqueID : a._depth-b._depth;
+};
+MovieClip.prototype.__recalculateDepth__ = false;
+MovieClip.prototype.setDepth = function(depth) {
+	DisplayObject.prototype.setDepth.call(this, depth);
+	if (this._parent) {
+		this._parent.__recalculateDepth__ = true;
+	}
 };
 /**
  * this function adds the mc MovieClip to this MovieClip
@@ -74,7 +88,10 @@ MovieClip.prototype.depthCompare = function(a,b){
 MovieClip.prototype.addChild = function(mc) {
 	mc._parent     = this;
 	this[mc._name] = mc;
-	this._children.push(mc);
+	this.__children.push(mc);
+	if (this._parent) {
+		this._parent.__recalculateDepth__ = true;
+	}
 	return mc;
 };
 /**
@@ -82,8 +99,17 @@ MovieClip.prototype.addChild = function(mc) {
  * @param Tween tween animation to add
  * @return void
  */
-MovieClip.prototype.addTween = function(tween) {
-	this._tweens.push(tween);
+MovieClip.tweenCount = 0;
+MovieClip.prototype.addTween = function(tween, key) {
+	if (key === undefined) {
+		key = 'tween'+(++MovieClip.tweenCount);
+	}
+	if (this.__tweens[key]) {
+		delete this.__tweens[key];
+	}
+	tween.setTarget(this);
+	this.__tweens[key] = tween;
+	return this;
 };
 /**
  * this function removes the mc MovieClip from this MovieClip
@@ -91,63 +117,47 @@ MovieClip.prototype.addTween = function(tween) {
  * @return void
  */
 MovieClip.prototype.removeChild = function(mc) {
-	this._children.splice(this._children.indexOf(mc),1);
+	this.__children.splice(this.__children.indexOf(mc),1);
 	mc._parent = null;
 	delete this[mc._name];
 };
-/**
- * this function returns the bounding box of the movieclip
- * used for hit tests when not specified
- * @return object
- */
-// MovieClip.prototype.getBoundingBox = function() {
-// 	return {
-// 		x: this._x+this._offsetX,
-// 		y: this._y+this._offsetY,
-// 		width: this._width,
-// 		height: this._height
-// 	};
-// };
-/**
- * this function returns true of the MovieClip specified satisfies
- * the requirements of a "collision" or overlapping area
- * @param MovieClip mc movieclip to hit test
- * @return boolean
- */
-// MovieClip.prototype.hitTest = function(mc) {
-// 	var rect1 = this.getBoundingBox(),
-// 		rect2 = mc.getBoundingBox();
-// 	return rect1.x < rect2.x + rect2.width
-// 		&& rect1.x + rect1.width > rect2.x
-// 		&& rect1.y < rect2.y + rect2.height
-// 		&& rect1.height + rect1.y > rect2.y;
-// };
-// MovieClip.prototype.pointHitTest = function(point) {
-// 	var rect1 = this.getBoundingBox();
-// 	return rect1.x < point.x
-// 		&& rect1.x + rect1.width > point.x
-// 		&& rect1.y < point.y
-// 		&& rect1.height + rect1.y > point.y;
-// };
-MovieClip.prototype.trigger = function(type, event) {
-	DisplayObject.prototype.trigger.call(this, type, event);
-	this._children.forEach(function(mc) {
-		mc.trigger(type, event);
+MovieClip.prototype.trigger = function(type, event, bubble) {
+	if (!bubble) {
+		DisplayObject.prototype.trigger.call(this, type, event);
+	}
+	this.__children.reverse().forEach(function(mc) {
+	 	mc.trigger(type, event, bubble);
 	});
-};
-MovieClip.prototype.tickLogic = function() {
-	// handling tweens
-	for (var i in this._tweens) {
-		this._tweens[i].tick();
-		if (this._tweens[i].isComplete()) {
-			delete this._tweens[i];
-			this._tweens.splice(i,1);
-		}j
+	if (bubble) {
+		DisplayObject.prototype.trigger.call(this, type, event);
 	}
 };
-MovieClip.prototype.tickGraphics = function(ctx) {
+MovieClip.prototype.tickLogic = function() {
+	//console.log(this._name+':'+this.isMouseOver());
+	if (this.isMouseOver()) {
+		if (this.__prevMouseOver === false) DisplayObject.prototype.trigger.call(this, 'onMouseOver', this.__mouseEvent);
+		if (this.__mouseEvent.move) DisplayObject.prototype.trigger.call(this, 'onMouseMove', this.__mouseEvent);
+		if (this.__mouseEvent.down) DisplayObject.prototype.trigger.call(this, 'onMouseDown', this.__mouseEvent);
+		if (this.__mouseEvent.up) DisplayObject.prototype.trigger.call(this, 'onMouseUp', this.__mouseEvent);
+	} else if (this.__prevMouseOver) {
+		DisplayObject.prototype.trigger.call(this, 'onMouseOut', this.__mouseEvent);
+	}
+	this.__prevMouseOver = this.isMouseOver();
+
+	// handling tweens
+	for (var i in this.__tweens) {
+		this.__tweens[i].tick();
+		if (this.__tweens[i].isComplete()) {
+			delete this.__tweens[i];
+		}
+	}
+};
+MovieClip.prototype.tickGraphics = function(ctx, mouseEvent) {
 	// sorting children for graphical display
-	this._children.sort(this.depthCompare);
+	if (this.__recalculateDepth__) {
+		this.__children.sort(this.depthCompare);
+		this.__recalculateDepth__ = false;
+	}
 
 	// drawing if visible
 	if (this._visible) {
@@ -155,13 +165,44 @@ MovieClip.prototype.tickGraphics = function(ctx) {
 		ctx.save();
 		// apply context
 		this.applyContext(ctx);
+		// adjusting mouseEvent
+		mouseEvent = {
+			type: 'mouse',
+			parentEvent: mouseEvent,
+			target: this._name,
+			globalX: mouseEvent.globalX,
+			globalY: mouseEvent.globalY,
+			x: this.__t.a*mouseEvent.x + this.__t.c*mouseEvent.y + this.__t.e,
+			y: this.__t.b*mouseEvent.x + this.__t.d*mouseEvent.y + this.__t.f,
+			move: mouseEvent.move,
+			up: mouseEvent.up,
+			down: mouseEvent.down
+		};
 		// render this objects graphics
 		this.renderGraphics(ctx);
+		// checking if mouse events should be triggered
+		this.setMouseOver(ctx.isPointInPath(mouseEvent.globalX, mouseEvent.globalY));
+		this.__mouseEvent = mouseEvent;
 		// render child graphics children
-		this._children.forEach(function(mc){
-			mc.tickGraphics(ctx);
+		this.__children.forEach(function(mc){
+			mc.tickGraphics(ctx, mouseEvent);
 		});
 		// restoring context
 		ctx.restore();
 	}
+};
+MovieClip.prototype.setMouseOver = function(value) {
+	this.__mouseOver     = value;
+	if (this._parent && value === true) {
+		this._parent.setMouseOver(value);
+	}
+};
+MovieClip.prototype.isMouseOver = function() {
+	return this.__mouseOver;
+};
+MovieClip.prototype.isMouseDown = function() {
+	return this.__mouseOver && this.__mouseEvent.down;
+};
+MovieClip.prototype.isMouseUp = function() {
+	return this.__mouseOver && this.__mouseEvent.up;
 };

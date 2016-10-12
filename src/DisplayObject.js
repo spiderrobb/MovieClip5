@@ -22,6 +22,7 @@ function DisplayObject(args) {
 	this._alpha          = args._alpha !== undefined ? args._alpha : 1;
 	// MovieClip Depth Highest number wins
 	this._depth          = args._depth !== undefined ? args._depth : 1;
+	this.__depth__       = 1;
 	// MovieClip Bisibility, onEnterFrame will still get called
 	this._visible        = args._visible !== undefined ? args._visible :  true;
 	// Graphic type
@@ -30,35 +31,64 @@ function DisplayObject(args) {
 	this._graphicArgs    = args._graphicArgs || {};
 	// image smoothing
 	this._smoothImage    = args._smoothImage || 'inherit';
+	// various integrated filters
+	this._filterBlur                 = 0;
+	this._filterBrightness           = 1;
+	this._filterContrast             = 1;
+	this._filterDropShadowX          = 0;
+	this._filterDropShadowY          = 0;
+	this._filterDropShadowBlurRadius = 0;
+	this._filterDropShadowColor      = null;
+	this._filterGrayScale            = 0;
+	this._filterHueRotate            = 0;
+	this._filterInvert               = 0;
+	this._filterSaturate             = 1;
+	this._filterSepia                = 0;
+
 	// variable for transform
-	this.__t   = document.createElementNS("http://www.w3.org/2000/svg", "svg").createSVGMatrix();
-	this.__ti  = this.__t.inverse();
+	this.__t             = new Matrix();
+	// variable for filters
 	// call parent constructor
 	EventObject.call(this);
 }
+DisplayObject.prototype.getDepth = function() {
+	return this.__depth__;
+};
+DisplayObject.prototype.setDepth = function(depth) {
+	this.__depth__ = depth;
+};
+Object.defineProperty(DisplayObject.prototype, '_depth', {
+	get: function() {
+		return this.getDepth();
+	},
+	set: function(depth) {
+		this.setDepth(depth);
+	}
+});
 DisplayObject.prototype.applyContext = function(ctx){
-		// applying alpha
+	// applying alpha
 	if (this._alpha !== 1) ctx.globalAlpha *= this._alpha;
-		// applying image smoothing
+	// applying image smoothing
 	if (this._smoothImage !== 'inherit') ctx.imageSmoothingEnabled = this._smoothImage;
 	// init transform
-	this.__t.a = 1;
-	this.__t.b = 0;
-	this.__t.c = 0;
-	this.__t.d = 1;
-	this.__t.e = 0;
-	this.__t.f = 0;
+	this.__t.reset();
 	// applying x y coordinates
-	if (this._x !== 0 || this._y !== 0) this.__t = this.__t.translate(this._x, this._y);
+	if (this._x !== 0 || this._y !== 0) 
+		this.__t.translate(this._x, this._y);
 	// applying scaling
-	if (this._scaleX !== 1 || this._scaleY !== 1) this.__t = this.__t.scaleNonUniform(this._scaleX, this._scaleY);
+	if (this._scaleX !== 1 || this._scaleY !== 1) 
+		this.__t.scaleNonUniform(this._scaleX, this._scaleY);
 	// applying rotation
-	if (this._rotation !== 0) this.__t = this.__t.rotate(this._rotation);
+	if (this._rotation !== 0) 
+		this.__t.rotate(this._rotation);
 	// skew
-	if (this._skewX !== 0) this.__t = this.__t.skewX(this._skewX);
-	if (this._skewY !== 0) this.__t = this.__t.skewY(this._skewY);
+	if (this._skewX !== 0) 
+		this.__t.skewX(this._skewX);
+	if (this._skewY !== 0) 
+		this.__t.skewY(this._skewY);
 	// applying origin shift
-	if (this._originX !== 0 || this._originY !== 0) this.__t = this.__t.translate(this._originX, this._originY);
+	if (this._originX !== 0 || this._originY !== 0) 
+		this.__t.translate(this._originX, this._originY);
 	// apply transform to ctx
 	ctx.transform(
 		this.__t.a,
@@ -68,22 +98,7 @@ DisplayObject.prototype.applyContext = function(ctx){
 		this.__t.e,
 		this.__t.f
 	);
-	this.__ti = this.__t.inverse();
-};
-DisplayObject.prototype.trigger = function(type, event) {
-	// todo add rotation and skew?
-	if (event !== undefined 
-		&& event !== null 
-		&& event.type !== undefined 
-		&& event.type == 'mouse'
-	) {
-		event.parentX = event.x;
-		event.parentY = event.y;
-		event.target  = this._name;
-		event.x = this.__ti.a*event.parentX + this.__ti.c*event.parentY + this.__ti.e;
-		event.y = this.__ti.b*event.parentX + this.__ti.d*event.parentY + this.__ti.f;
-	}
-	EventObject.prototype.trigger.call(this, type, event);
+ 	this.__t.inverse();
 };
 /**
  * this function is responsible for the graphical
@@ -96,12 +111,42 @@ DisplayObject.prototype.trigger = function(type, event) {
  * @param CanvasRenderingContext2D ctx the canvas 2d context
  * @return void
  */
-DisplayObject.prototype.renderGraphics = function(ctx){
+DisplayObject.prototype.renderGraphics = function(ctx) {
 	// calculating color of fill and stroke
 	if (this._graphicArgs.fillStyle !== undefined)
 		ctx.fillStyle = this._graphicArgs.fillStyle;
 	if (this._graphicArgs.strokeStyle !== undefined)
 		ctx.strokeStyle = this._graphicArgs.strokeStyle;
+	if (this._graphicArgs.lineWidth !== undefined)
+		ctx.lineWidth = this._graphicArgs.lineWidth;
+
+	// handling filters
+	var filters = [];
+	if (this._filterBlur !== 0)
+		filters.push(' blur('+this._filterBlur+'px)');
+	if (this._filterBrightness !== 1) 
+		filters.push('brightness('+this._filterBrightness+')');
+	if (this._filterContrast !== 1) 
+		filters.push('contrast('+this._filterContrast+')');
+	if (this._filterDropShadowColor !== null) 
+		filters.push('drop-shadow('
+			+this._filterDropShadowX
+			+'px '+this._filterDropShadowY
+			+'px '+this._filterDropShadowBlurRadius 
+			+' '+this._filterDropShadowColor
+			+'px)');
+	if (this._filterGrayScale !== 0) 
+		filters.push('grayscale('+this._filterGrayScale+')');
+	if (this._filterHueRotate !== 0)
+		filters.push('hue-rotate('+this._filterHueRotate+'deg)');
+	if (this._filterInvert !== 0)
+		filters.push('invert('+this._filterInvert+')');
+	if (this._filterSaturate !== 1)
+		filters.push('saturate('+this._filterSaturate+')');
+	if (this._filterSepia !== 0)
+		filters.push('sepia('+this._filterSepia+')');
+	if (filters.length > 0) 
+		ctx.filter = filters.join(' ');
 
 	// rectangle
 	if (this._graphic === 'stage') {
@@ -149,6 +194,8 @@ DisplayObject.prototype.renderGraphics = function(ctx){
 
 		// image
 	} else if (this._graphic === 'image') {
+		ctx.beginPath();
+		ctx.rect(0, 0, this._width, this._height);
 		if (this._width === null || this._height === null) {
 			ctx.drawImage(
 				this._graphicArgs.image,
@@ -161,6 +208,7 @@ DisplayObject.prototype.renderGraphics = function(ctx){
 				this._width, this._height
 			);
 		}
+		if (this._graphicArgs.strokeStyle !== undefined) ctx.stroke();
 
 		// imageSprite
 	} else if (this._graphic === 'imageSprite') {

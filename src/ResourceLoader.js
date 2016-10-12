@@ -4,6 +4,7 @@
 function ResourceLoader() {
 	this._loadedResources = 0;
 	this._totalResources  = 0;
+	this._resourceList    = [];
 }
 /**
  * this funcion loads a single image
@@ -18,6 +19,7 @@ ResourceLoader.prototype.loadImage = function(key, url, callback) {
 	this[key]        = new Image();
 	this[key].onload = callback;
 	this[key].src    = url;
+	this._resourceList.push(this[key]);
 };
 /**
  * this function loads a list of images
