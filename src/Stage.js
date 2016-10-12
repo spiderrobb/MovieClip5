@@ -55,7 +55,6 @@ function Stage(canvas_id, args) {
 
 			// calling on enter frame
 			self.trigger('onEnterFrame');
-			console.log(_context);
 			
 			// clear input context
 			Mouse.clear();
