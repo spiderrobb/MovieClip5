@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Tweens</title>
+		<script type="text/javascript" src="../build/MovieClip5.min.js"></script>
+		<style>
+			#canvas1 {
+				position:absolute;
+				top:0px;
+				left:0px;
+				height:100%;
+				width:100%;
+				background-color:#000;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="canvas1"></canvas>
+		<script>
+		var easing_functions = [
+			'linearTween',
+			'easeInQuad',
+			'easeInCubic',
+			'easeInQuart',
+			'easeInQuint',
+			'easeInSine',
+			'easeInExpo',
+			'easeInCirc',
+			'easeInElastic',
+			'easeInBack',
+			'easeInBounce',
+
+			'easeOutQuad',
+			'easeOutCubic',
+			'easeOutQuart',
+			'easeOutQuint',
+			'easeOutSine',
+			'easeOutExpo',
+			'easeOutCirc',
+			'easeOutElastic',
+			'easeOutBack',
+			'easeOutBounce',
+			
+			'easeInOutQuad',
+			'easeInOutCubic',
+			'easeInOutQuart',
+			'easeInOutQuint',
+			'easeInOutSine',
+			'easeInOutExpo',
+			'easeInOutCirc',
+			'easeInOutElastic',
+			'easeInOutBack',
+			'easeInOutBounce'
+		],
+		_root = new Stage('canvas1');
+		for (var i = 0; i<easing_functions.length; i++) {
+			_root.addChild(new MovieClip({
+				_name: easing_functions[i],
+				_width: 100,
+				_height: 20,
+				_y: (20+5)*i,
+				_graphic: 'rectangle',
+				_graphicArgs: {
+					fillStyle: 'red'
+				}
+			})).addTween(new Tween({
+				type: easing_functions[i],
+				frames: 60,
+				end: {
+					_x: _root._width-100,
+				}
+			})).addChild(new MovieClip({
+				_y: 10,
+				_graphic: 'text',
+				_graphicArgs: {
+					text: easing_functions[i],
+					fillStyle: 'white'
+				}
+			}));	
+		}
+		_root.play();
+		</script>
+	</body>
+</html>

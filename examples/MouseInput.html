@@ -2,14 +2,7 @@
 <html>
 	<head>
 		<title>test</title>
-		<script type="text/javascript" src="../src/EventObject.js"></script>
-		<script type="text/javascript" src="../src/DisplayObject.js"></script>
-		<script type="text/javascript" src="../src/MovieClip.js"></script>
-		<script type="text/javascript" src="../src/Stage.js"></script>
-		<script type="text/javascript" src="../src/Key.js"></script>
-		<script type="text/javascript" src="../src/Mouse.js"></script>
-
-		<!-- <script type="text/javascript" src="../build/MovieClip5.min.js"></script> -->
+		<script type="text/javascript" src="../build/MovieClip5.min.js"></script>
 		<style>
 			#canvas1 {
 				position:absolute;
@@ -29,27 +22,75 @@
 				frameRate:24
 			});
 			stage.addChild(new MovieClip({
-				_name: 'container',
+				_name: 'container1',
+				_x: 100,
 				onEnterFrame: function() {
-					this._rotation += 1;
+					this._rotation += Math.PI/360;
 				}
 			}));
-			stage.container.addChild(new MovieClip({
-				_name: 'mouse_pointer',
-				_graphic: 'text',
-				_x: 100,
+			stage.addChild(new MovieClip({
+				_name: 'container2',
 				_y: 100,
+				onEnterFrame: function() {
+					//this._rotation -= Math.PI/360;
+				}
+			}));
+			stage.container1.addChild(new MovieClip({
+				_name: 'mouse_pointer1',
+				_graphic: 'text',
 				_graphicArgs: {
 					fillStyle: 'white',
 					font: "20px Arial"
 				},
-				onMouseMove: function(e) {
-					console.log(e);
-					this._graphicArgs.text = 'x: '+e.parentX+' y: '+e.parentY;
-					this._x = e.parentX;
-					this._y = e.parentY;
+				onEnterFrame: function() {
+					this._graphicArgs.text = 'p1 x: '+this.__mouseEvent.parentEvent.x+' y: '+this.__mouseEvent.parentEvent.y;
+					this._x = this.__mouseEvent.parentEvent.x;
+					this._y = this.__mouseEvent.parentEvent.y;
+				},
+				onMouseDown: function(event) {
+					console.log('test pointer 1');
 				}
 			}));
+			stage.container2.addChild(new MovieClip({
+				_name: 'mouse_pointer2',
+				_graphic: 'text',
+				_graphicArgs: {
+					fillStyle: 'white',
+					font: "20px Arial"
+				},
+				onEnterFrame: function() {
+					this._graphicArgs.text = 'p1 x: '+this.__mouseEvent.parentEvent.x+' y: '+this.__mouseEvent.parentEvent.y;
+					this._x = this.__mouseEvent.parentEvent.x;
+					this._y = this.__mouseEvent.parentEvent.y;
+				},
+				onMouseDown: function(event) {
+					this._graphicArgs.fillStyle = 'red';
+				},
+				onMouseUp:function(event) {
+					this._graphicArgs.fillStyle = 'white';
+				}
+			}));
+			stage.container2.mouse_pointer2.addChild(new MovieClip({
+				_name: 'block',
+				_width: 100,
+				_height: 100,
+				_x: 100,
+				_graphic: 'rectangle',
+				_graphicArgs: {
+					fillStyle: 'red'
+				}
+			}));
+			var myListener = {
+				onMouseMove: function(event) {
+					console.log(event);
+				}
+			};
+			//stage.addListener(myListener);
+			stage.container1.addListener(myListener);
+			stage.container1.mouse_pointer1.addListener(myListener);
+			stage.container2.addListener(myListener);
+			stage.container2.mouse_pointer2.addListener(myListener);
+			stage.container2.mouse_pointer2.block.addListener(myListener);
 			stage.play();
 		</script>
 	</body>

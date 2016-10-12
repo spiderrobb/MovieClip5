@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Stage Object Example</title>
+		<script type="text/javascript" src="../build/MovieClip5.min.js"></script>
+		<script type="text/javascript" src="../src/Platformer/Level.js"></script>
+		<script type="text/javascript" src="../src/Platformer/Library.js"></script>
+		<script type="text/javascript" src="../src/Platformer/PlatformObject.js"></script>
+		<script type="text/javascript" src="../src/Platformer/Platform.js"></script>
+		<script type="text/javascript" src="../src/Platformer/Player.js"></script>
+		<script type="text/javascript" src="../src/Platformer/Portal.js"></script>
+		<script type="text/javascript" src="../src/Platformer/World.js"></script>
+		<!-- <script type="text/javascript" src="../build/MovieClip5.platformer.min.js"></script> -->
+		<style>
+			#canvas1 {
+				position:absolute;
+				top:0px;
+				left:0px;
+				height:100%;
+				width:100%;
+				background-color:#000;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="canvas1"></canvas>
+		<script type="text/javascript">
+		var stage = new Stage('canvas1', {
+			_width:800,
+			_height:600,
+			displayState:'fit',
+			init: function() {
+				this.setDims = function() {
+					this._width = 800;
+					this._height = 600;
+				};
+			},
+			onEnterFrame: function() {
+				if (Key.isDown(70)) {
+					this.displayState = 'fit';
+					this.setDims();
+				} else if (Key.isDown(79)) {
+					this.displayState = 'original';
+					this.setDims();
+				} else if (Key.isDown(83)) {
+					this.displayState = 'stretch';
+					this.setDims();
+				} else if (Key.isDown(68)) {
+					this.displayState = 'dynamic';
+				}
+			}
+		});
+			myLibrary = new Library(),
+			myWorld   = new World(stage),
+			maps      = {
+				home: {
+					default: true,
+					platforms: [
+						{
+							_x: -10, _y: 0,
+							_height: 600, _width: 10
+						}, {
+							_x: 800, _y: 0,
+							_height: 600, _width: 10
+						}, {
+							_x: -1, _y: 300,
+							_height: 10, _width: 802
+						}
+					],
+					portals: [
+						{
+							_name: 'home-door-bottom',
+							_toLevel: 'outside',
+							_toPortal: 'home-door-bottom',
+							_x: 350, _y: 500
+						},
+						{
+							_name: 'home-door-top',
+							_toLevel: 'outside',
+							_toPortal: 'home-door-top',
+							_x: 350, _y: 200
+						}
+					]
+				},
+				outside: {
+					platforms: [
+						{
+							_y: 490,
+							_width: 100, _height: 10
+						}
+					],
+					portals: [
+						{
+							_name: 'home-door-bottom',
+							_toLevel: 'home',
+							_toPortal: 'home-door-bottom',
+							_y: 500
+						}, {
+							_name: 'home-door-top',
+							_toLevel: 'home',
+							_toPortal: 'home-door-top',
+							_y:390
+						}
+					]
+				}
+			};
+		myLibrary.add('player', function(args){
+			args = Object.assign({
+				_height: 100,
+				_width: 50,
+				_graphic: 'rectangle',
+				_graphicArgs: {
+					fillStyle: 'red'
+				}
+			}, args);
+			return new Player(args);
+		});
+		myLibrary.add('platform', function(args) {
+			return new Platform(Object.assign({
+				_width: 200,
+				_height: 15,
+				_graphic: 'rectangle',
+				_graphicArgs: {
+					fillStyle: 'red'
+				}
+			}, args));
+		});
+		myLibrary.add('portal', function(args) {
+			return new Portal(Object.assign({
+				_width: 100,
+				_height: 100,
+				_graphic: 'rectangle',
+				_graphicArgs: {
+					fillStyle: 'blue'
+				}
+			}, args));
+		});
+		for (var key in maps) {
+			var level = myWorld.newLevel(key);
+			maps[key].platforms.forEach(function(p) {
+				level.addPlatform(myLibrary.get('platform', p));
+			});
+			maps[key].portals.forEach(function(p) {
+				level.addPortal(myLibrary.get('portal', p));
+			});
+			level.addPlayer(myLibrary.get('player'));
+			if (maps[key].default) {
+				myWorld.setLevel(key);
+			}
+		}
+		stage.play();
+		</script>
+	</body>
+</html>

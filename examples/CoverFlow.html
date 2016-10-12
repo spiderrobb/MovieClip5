@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Cover Flow</title>
+		<script type="text/javascript" src="../build/MovieClip5.min.js"></script>
+		<style>
+			#canvas1 {
+				position:absolute;
+				top:0px;
+				left:0px;
+				height:100%;
+				width:100%;
+				background-color:#000;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="canvas1"></canvas>
+		<script>
+		function CoverFlow(mc, resourcelist) {
+			var self        = this,
+				items       = [],
+				selected    = 0, //Math.ceil(count/2),
+				frames      = 30;
+			this.animate = function() {
+				var i, limiter, 
+					item_spacing    = 40,
+					select_limiter = mc._width/items[selected]._width;
+				if (select_limiter > mc._height/items[selected]._height) {
+					select_limiter = mc._height/items[selected]._height;
+				}
+				for (i = 0; i<items.length; i++) {
+					limiter = mc._width/items[i]._width;
+					if (limiter > mc._height/items[i]._height) {
+						limiter = mc._height/items[i]._height;
+					}
+					if (i == selected) {
+						items[i].addTween(new Tween({
+							frames: frames,
+							type: 'easeOutElastic',
+							end: {
+								_x: mc._width/2,
+								_y: mc._height/2 + limiter*0.96*items[i]._height/2,
+								_scaleX: limiter*0.96,
+								_scaleY: limiter*0.96,
+								_skewY: 0,
+								_depth: items.length*2+100,
+							}
+						}), 'coverflow');
+					} else if (i < selected) {
+						items[i].addTween(new Tween({
+							frames: frames,
+							type: 'easeOutElastic',
+							end: {
+								_x: mc._width/2 + (i-(selected-1))*item_spacing + -items[selected]._width*select_limiter/2,
+								_y: mc._height*0.75 + limiter*0.30*items[i]._height/2,
+								_scaleX: limiter*0.30,
+								_scaleY: limiter*0.30,
+								_skewY: -15,
+								_depth: i-selected+100,
+							}
+						}), 'coverflow');
+					} else if (i > selected) {
+						items[i].addTween(new Tween({
+							frames: frames,
+							type: 'easeOutElastic',
+							end: {
+								_x: mc._width/2 + (i-(selected+1))*item_spacing + items[selected]._width*select_limiter/2,
+								_y: mc._height*0.75 + limiter*0.30*items[i]._height/2,
+								_scaleX: limiter*0.25,
+								_scaleY: limiter*0.25,
+								_skewY: 15,
+								_depth: selected-i+100
+							}
+						}), 'coverflow');
+					}
+				}
+			};
+			this.onResize = function() {
+				this.animate();
+			};
+			this.next = function() {
+				selected++;
+				if (selected > items.length-1) {
+					selected = 0;
+				}
+				this.animate();
+			};
+			this.previous = function() {
+				selected--;
+				if (selected < 0) {
+					selected = items.length-1;
+				}
+				this.animate();
+			};
+			this.setSelected = function(s) {
+				selected = s;
+				this.animate();
+			};
+			mc.addChild(new MovieClip({
+				_name: 'background',
+				_graphic: 'image',
+				_alpha: .2,
+				init: function() {
+					this.onResize();
+				},
+				onResize: function() {
+					this._width = mc._width;
+					this._height = mc._height;	
+				},
+				onEnterFrame: function() {
+					this._graphicArgs.image = resourcelist[selected];	
+				}
+			}));
+			for (var i = 0; i<resourcelist.length; i++) {
+				items.push(mc.addChild(new MovieClip({
+					_name:        'box'+i,
+					_width:       resourcelist[i].width,
+					_height:      resourcelist[i].height,
+					_originX:     -resourcelist[i].width/2,
+					_originY:     -resourcelist[i].height,
+					_graphic:     'image',
+					_graphicArgs: {
+						image: resourcelist[i]
+					},
+					init: function() {
+						this._index = i;
+					},
+					onMouseUp: function(event) {
+						self.setSelected(this._index);	
+					}
+				})));
+			}
+			this.animate();
+			mc.addListener(this);
+		}
+		var coverflow = null;
+		var _root = new Stage('canvas1', {
+			_smoothImage: false,
+			onEnterFrame: function() {
+				if (coverflow !== null) {
+					if (Key.justDown(Key.RIGHT)) {
+						coverflow.next();
+					} else if (Key.justDown(Key.LEFT)) {
+						coverflow.previous();
+					}
+					if (Key.justDown(Key.ENTER)) {
+						this._smoothImage = !this._smoothImage;
+					}
+				}
+			}
+		});
+		_root.addChild(new MovieClip({
+			_name: 'loader',
+			_width: 200,
+			_height: 40,
+			_x: _root._width/2-100,
+			_y: _root._height/2-20,
+			_graphic: 'rectangle',
+			_graphicArgs: {
+				fillStyle: 'grey'
+			}
+		}));
+		_root.loader.addChild(new MovieClip({
+			_name: 'bar',
+			_width: 0,
+			_height: 30,
+			_x: 5,
+			_y: 5,
+			_graphic: 'rectangle',
+			_graphicArgs: {
+				fillStyle: 'blue'
+			}
+		}));
+		_root.loader.addChild(new MovieClip({
+			_name: 'text',
+			_graphic: 'text',
+			_graphicArgs: {
+				text: "Loading...",
+				fillStyle: 'white',
+				font: "20px Arial"
+			}
+		}));
+		function test() {
+			var circle_d=300, a=.8,w=4,l=15,dw=.98;
+			_root.addChild(new MovieClip({
+				_name: 'rings',
+				_x: 200,
+				_y: 200
+			}));
+			_root.rings.addChild(new MovieClip({
+				_name : 'circle1',
+				_originX: w,
+				_width: circle_d*dw,
+				_height: circle_d,
+				_graphic: 'ellipse',
+				_graphicArgs: {
+					strokeStyle: 'green',
+					lineWidth: l
+				},
+				_alpha: a,
+				onEnterFrame: function() {
+					this._rotation += 1*Math.PI/360;
+				}
+			}));
+			_root.rings.addChild(new MovieClip({
+				_name : 'circle2',
+				_originY: -w,
+				_width: circle_d*dw,
+				_height: circle_d,
+				_graphic: 'ellipse',
+				_graphicArgs: {
+					strokeStyle: 'red',
+					lineWidth: l
+				},
+				_alpha: a,
+				onEnterFrame: function() {
+					this._rotation += 5*Math.PI/360;
+				}
+			}));
+			_root.rings.addChild(new MovieClip({
+				_name : 'circle3',
+				_originX: -w,
+				_width: circle_d*dw,
+				_height: circle_d,
+				_graphic: 'ellipse',
+				_graphicArgs: {
+					strokeStyle: 'blue',
+					lineWidth: l
+				},
+				_alpha: a,
+				onEnterFrame: function() {
+					this._rotation += 4*Math.PI/360;
+				}
+			}));
+			_root.rings.addChild(new MovieClip({
+				_name : 'circle4',
+				_originY: w,
+				_width: circle_d*dw,
+				_height: circle_d,
+				_graphic: 'ellipse',
+				_graphicArgs: {
+					strokeStyle: 'yellow',
+					lineWidth: l
+				},
+				_alpha: a,
+				onEnterFrame: function() {
+					this._rotation += 3*Math.PI/360;
+				}
+			}));
+			_root.rings.addChild(new MovieClip({
+				_name : 'circle5',
+				_originX: w,
+				_width: circle_d*dw,
+				_height: circle_d,
+				_graphic: 'ellipse',
+				_graphicArgs: {
+					strokeStyle: 'white',
+					lineWidth: l
+				},
+				_alpha: a,
+				onEnterFrame: function() {
+					this._rotation += 2*Math.PI/360;
+				}
+			}));
+		}
+		var resources = new ResourceLoader();
+		test();
+		resources.loadImages({
+			img1: 'assets/album1.jpg',
+			img2: 'assets/album2.jpg',
+			img3: 'assets/album3.jpg',
+			img4: 'assets/album4.jpg',
+			img5: 'assets/album5.jpg',
+			img6: 'assets/album6.jpg',
+			img7: 'assets/album7.jpg',
+			img8: 'assets/album8.jpg',
+			img9: 'assets/album9.jpg',
+			img10: 'assets/album10.jpg',
+			img11: 'assets/album11.jpg',
+			img12: 'assets/album12.jpg',
+			img13: 'assets/album13.jpg',
+			img14: 'assets/album14.jpg',
+			img15: 'assets/album15.jpg',
+			img16: 'assets/album16.jpg',
+			gar: 'assets/album9.jpg'
+		}, function(total, loaded) {
+			_root.loader.bar.addTween(new Tween({
+				target: _root.loader.bar,
+				frames: 10,
+				end: {
+					_width: 190*loaded/total
+				}
+			}), 'progress');
+			_root.loader.text._graphicArgs.text = 'Loading: '+loaded+' of '+total;
+			if (loaded === total) {
+				_root.loader.addTween(new Tween({
+					target: _root.loader,
+					frames: 20,
+					end: {
+						_alpha: 0,
+						_y: _root._height
+					}
+				}, function() {
+					_root.removeChild(_root.loader);
+					coverflow = new CoverFlow(_root,resources._resourceList);
+				}));
+			}
+		});
+
+		_root.play();
+		</script>
+	</body>
+</html>
+
+
+
+
+
+
+<!--
+
+this.animate = function() {
+				for (var i = 0; i<count; i++) {
+					if (i == selected) {
+						items[i].addTween(new Tween({
+							target: items[i],
+							frames: frames,
+							type: 'easeInOutSine',
+							end: {
+								_x: mc._width/2,
+								_y: mc._height/2,
+								_scaleX: 2,
+								_scaleY: 2,
+								_skewY: 0,
+								_depth: items.length*2,
+							}
+						}), 'coverflow');
+					} else if (i < selected) {
+						items[i].addTween(new Tween({
+							target: items[i],
+							frames: frames,
+							type: 'easeInOutSine',
+							end: {
+								_x: mc._width/2+(i-selected)*20 - 200,
+								_y: mc._height - 50,
+								_scaleX: .3,
+								_scaleY: 1,
+								_skewY: -15,
+								_depth: i-selected,
+							}
+						}), 'coverflow');
+					} else if (i > selected) {
+						items[i].addTween(new Tween({
+							target: items[i],
+							frames: frames,
+							type: 'easeInOutSine',
+							end: {
+								_x: 200+mc._width/2+(i-selected)*20,
+								_y: mc._height - 50,
+								_scaleX: .3,
+								_scaleY: 1,
+								_skewY: 15,
+								_depth: selected-i
+							}
+						}), 'coverflow');
+					}
+				}
+			};
+
+this.animate = function() {
+				var deg = Math.PI/(2*count),
+					rad = 200;
+				for (var i = 0; i<items.length; i++) {
+					if (i == selected) {
+						items[i].addTween(new Tween({
+							target: items[i],
+							frames: 20,
+							end: {
+								_x: mc._width/2,
+								_y: mc._height/2,
+								_rotation: 0,
+								_scaleX: 1,
+								_scaleY: 1
+							}
+						}));
+					} else {
+						items[i].addTween(new Tween({
+							target: items[i],
+							frames: 20,
+							end: {
+								_x: rad*Math.cos((selected-i)*deg),
+								_y: mc._height + rad*Math.sin((selected-i)*deg),
+								_rotation: (selected-i)*deg,
+								_scaleX: .1,
+								_scaleY: .1
+							}
+						}));
+					}
+				}
+			};

@@ -17,7 +17,7 @@
 	<body>
 		<canvas id="canvas1"></canvas>
 		<script type="text/javascript">
-			var stage = new Stage('canvas1', {_width: 500, _height: 500});
+			var stage = new Stage('canvas1');
 			stage.addChild(new MovieClip({
 				_name: 'paused_text',
 				_graphic: 'text',
@@ -30,7 +30,6 @@
 					textBaseline: 'middle'
 				}
 			}));
-			stage.displayState = 'dynamic';
 			new ParticleGenerator(stage);
 			stage.onBlur = function(e) {
 				stage.paused_text._x = stage._width/2;
@@ -44,6 +43,15 @@
 			}
 			stage.play();
 
+			function getRandomColor() {
+			    var letters = '0123456789ABCDEF';
+			    var color = '#';
+			    for (var i = 0; i < 6; i++ ) {
+			        color += letters[Math.floor(Math.random() * 16)];
+			    }
+			    return color;
+			}
+
 			//ParticleGenerator.prototype = Object.create(MovieClip.prototype);
 			function ParticleGenerator(mc) {
 				var self = this;
@@ -52,7 +60,7 @@
 				this._gravity = 2;
 				this._maxYVolocity = 20;
 				this._maxXVolocity = 10;
-				this._particles = 300;
+				this._particles = 1000;
 				this.onMouseMove = function(e) {
 					this._x = e.x;
 					this._y = e.y;
@@ -65,17 +73,18 @@
 					mc.addChild(new MovieClip({
 						_graphic: 'rectangle',
 						_graphicArgs: {
-							fillStyle: '#69D2E7',
-							strokeStyle: '#A7DBD8'
+							fillStyle: getRandomColor(),
+							strokeStyle: getRandomColor()
 						},
 						init: function() {
 							this._x         = self._x;
 							this._y         = self._y;
-							this._alpha     = 0.3;
+							//this._alpha     = 0.3;
 							this._width     = 1;
 							this._height    = 1;
 							this._yvolocity = -Math.random()*self._maxYVolocity;
 							this._xvolocity = 2*Math.random()*self._maxXVolocity-self._maxXVolocity;
+							this._rv        = 10*Math.random();
 						},
 						onEnterFrame: function() {
 							this._y += this._yvolocity;
@@ -87,7 +96,7 @@
 							if (this._y > mc._height) {
 								this.init();
 							}
-							this._rotation += 30;
+							this._rotation += this._rv;
 						}
 					}));
 				}

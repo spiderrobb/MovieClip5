@@ -23,13 +23,16 @@ var Key = {
 	UP: 38,
 
 	// sudo private variables and functions
-	_listeners: {},
+	//_listeners: {},
 	_state : {},
+	_justPressed: {},
+	_justReleased: {},
 	_lastKeyCode: null,
 	_onPress: function(event) {
 		if (Key._state[event.keyCode] === undefined) {
 			Key._lastKeyCode = event.keyCode;
 			if (Key.onKeyDown !== null) Key.onKeyDown();
+			Key._justPressed[event.keyCode] = true;
 		}
 		Key._state[event.keyCode] = true;
 	},
@@ -37,6 +40,7 @@ var Key = {
 		if (Key._state[event.keyCode]) {
 			Key._lastKeyCode = event.keyCode;
 			if (Key.onKeyUp !== null) Key.onKeyUp();
+			Key._justReleased[event.keyCode] = true;
 			delete Key._state[event.keyCode];
 		}
 	},
@@ -46,9 +50,22 @@ var Key = {
 	onKeyUp: null,
 
 	// methods
+	clear: function() {
+		delete Key._justReleased;
+		Key._justReleased = {};
+		delete Key._justPressed;
+		Key._justPressed = {};
+	},
+	justDown: function(keyCode) {
+		return Key._justPressed[keyCode] || false;
+	},
+	justUp: function(keyCode) {
+		return Key._justReleased[keyCode] || false;
+	},
 	isDown: function(keyCode) {
 		return Key._state[keyCode] || false;
 	},
+
 	getCode: function() {
 		return Key._lastKeyCode;
 	}
