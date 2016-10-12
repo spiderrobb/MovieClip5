@@ -125,7 +125,7 @@ MovieClip.prototype.trigger = function(type, event, bubble) {
 	if (!bubble) {
 		DisplayObject.prototype.trigger.call(this, type, event);
 	}
-	this.__children.reverse().forEach(function(mc) {
+	this.__children.forEach(function(mc) {
 	 	mc.trigger(type, event, bubble);
 	});
 	if (bubble) {
