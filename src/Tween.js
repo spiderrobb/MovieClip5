@@ -9,6 +9,7 @@ function Tween(opts, callback) {
 	this.end           = opts.end || false;
 	this.frames        = opts.frames || 1;
 	this.type          = opts.type || 'linearTween';
+	this.repeat        = opts.repeat || false;
 	this.current_frame = 0;
 	this.callback      = callback === undefined ? null : callback;	
 }
@@ -44,8 +45,9 @@ Tween.prototype.tick = function() {
 				this.frames
 			);
 		}
-		if (this.isComplete() && this.callback !== null) {
-			this.callback();
+		if (this.isComplete()) {
+			if (this.callback !== null) this.callback();
+			if (this.repeat) this.reset();
 		}
 	}
 };

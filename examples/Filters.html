@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Filters</title>
+		<script type="text/javascript" src="../build/MovieClip5.min.js"></script>
+		<style>
+			#canvas1 {
+				position:absolute;
+				top:0px;
+				left:0px;
+				height:100%;
+				width:100%;
+				background-color:#000;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="canvas1"></canvas>
+		<script>
+		var filters = [
+			{
+				attr: '_filterBlur',
+				start: 0,
+				end: 20
+			},
+			{
+				attr: '_filterBrightness',
+				start: 0,
+				end: 5
+			},
+			{
+				attr: '_filterContrast',
+				start: 0,
+				end: 5
+			},
+			{
+				attr: '_filterGrayScale',
+				start: 0,
+				end: 1
+			},
+			{
+				attr: '_filterHueRotate',
+				start: 0,
+				end: 360
+			},
+			{
+				attr: '_filterInvert',
+				start: 0,
+				end: 1
+			},
+			{
+				attr: '_filterSaturate',
+				start: 0,
+				end: 5
+			},
+			{
+				attr: '_filterSepia',
+				start: 0,
+				end: 1
+			},
+		],
+		i = 0,
+		_root = new Stage('canvas1');
+		var resources = new ResourceLoader();
+		resources.loadImages({
+			img1: 'assets/album5.jpg'
+		}, function(total, loaded) {
+			if (loaded === total) {
+				filters.forEach(function(config) {
+					var tween_config = {
+						repeat: true,
+						frames: 60,
+						start: {},
+						end: {}
+					};
+					tween_config.start[config.attr] = config.start;
+					tween_config.end[config.attr] = config.end;
+					_root.addChild(new MovieClip({
+						_width: 200,
+						_height: 200,
+						_x: (210*i)+10,
+						_y: 10,
+						_graphic: 'image',
+						_graphicArgs: {
+							image: resources.img1
+						}
+					})).addTween(new Tween(tween_config)).addChild(new MovieClip({
+						_y: 220,
+						_graphic: 'text',
+						_graphicArgs: {
+							font: '20px Arial',
+							fillStyle: 'white',
+							text: config.attr
+						}
+					}));
+					i++;
+				});
+			}
+		});
+		_root.play();
+		</script>
+	</body>
+</html>
