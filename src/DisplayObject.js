@@ -31,23 +31,11 @@ function DisplayObject(args) {
 	this._graphicArgs    = args._graphicArgs || {};
 	// image smoothing
 	this._smoothImage    = args._smoothImage || 'inherit';
-	// various integrated filters
-	this._filterBlur                 = 0;
-	this._filterBrightness           = 1;
-	this._filterContrast             = 1;
-	this._filterDropShadowX          = 0;
-	this._filterDropShadowY          = 0;
-	this._filterDropShadowBlurRadius = 0;
-	this._filterDropShadowColor      = null;
-	this._filterGrayScale            = 0;
-	this._filterHueRotate            = 0;
-	this._filterInvert               = 0;
-	this._filterSaturate             = 1;
-	this._filterSepia                = 0;
 
 	// variable for transform
 	this.__t             = new Matrix();
 	// variable for filters
+	this.__filters       = [];
 	// call parent constructor
 	EventObject.call(this);
 }
@@ -65,6 +53,14 @@ Object.defineProperty(DisplayObject.prototype, '_depth', {
 		this.setDepth(depth);
 	}
 });
+DisplayObject.prototype.addFilter = function(filter) {
+	this.__filters.push(filter);
+	return this;
+};
+DisplayObject.prototype.removeFilter = function(filter) {
+	this.__filters.splice(this.__filters.indexOf(filter), 1);
+	return this;
+};
 DisplayObject.prototype.applyContext = function(ctx){
 	// applying alpha
 	if (this._alpha !== 1) ctx.globalAlpha *= this._alpha;
@@ -121,32 +117,8 @@ DisplayObject.prototype.renderGraphics = function(ctx) {
 		ctx.lineWidth = this._graphicArgs.lineWidth;
 
 	// handling filters
-	var filters = [];
-	if (this._filterBlur !== 0)
-		filters.push(' blur('+this._filterBlur+'px)');
-	if (this._filterBrightness !== 1) 
-		filters.push('brightness('+this._filterBrightness+')');
-	if (this._filterContrast !== 1) 
-		filters.push('contrast('+this._filterContrast+')');
-	if (this._filterDropShadowColor !== null) 
-		filters.push('drop-shadow('
-			+this._filterDropShadowX
-			+'px '+this._filterDropShadowY
-			+'px '+this._filterDropShadowBlurRadius 
-			+' '+this._filterDropShadowColor
-			+'px)');
-	if (this._filterGrayScale !== 0) 
-		filters.push('grayscale('+this._filterGrayScale+')');
-	if (this._filterHueRotate !== 0)
-		filters.push('hue-rotate('+this._filterHueRotate+'deg)');
-	if (this._filterInvert !== 0)
-		filters.push('invert('+this._filterInvert+')');
-	if (this._filterSaturate !== 1)
-		filters.push('saturate('+this._filterSaturate+')');
-	if (this._filterSepia !== 0)
-		filters.push('sepia('+this._filterSepia+')');
-	if (filters.length > 0) 
-		ctx.filter = filters.join(' ');
+	if (this.__filters.length)
+		ctx.filter = this.__filters.join(' ');
 
 	// rectangle
 	if (this._graphic === 'stage') {

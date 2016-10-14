@@ -10,22 +10,32 @@ function Tween(opts, callback) {
 	this.frames        = opts.frames || 1;
 	this.type          = opts.type || 'linearTween';
 	this.repeat        = opts.repeat || false;
+	this.targets       = opts.targets || [];
+	this.target        = null;
 	this.current_frame = 0;
-	this.callback      = callback === undefined ? null : callback;	
+	this.callback      = callback === undefined ? null : callback;
+	this.targets.forEach(this.initStart);
 }
 Tween.prototype.setTarget = function(target) {
 	this.target = target;
 	// looping through and populating start if not specified
-	for (var i in this.end) {
-		if (typeof this.target[i] == 'number') {
-			this.start[i] = this.target[i];
+	if (this.end) {
+		this.initStart(this);
+	}
+};
+Tween.prototype.initStart = function(ob) {
+	if (!ob.start) 
+		ob.start = {};
+	for (var i in ob.end) {
+		if (typeof ob.target[i] == 'number') {
+			ob.start[i] = ob.target[i];
 		} else {
 			// unsupported type for tween
-			delete this.end[i];
+			delete ob.end[i];
 		}
-		if (this.end[i] === this.start[i]) {
-			delete this.end[i];
-			delete this.start[i];
+		if (ob.end[i] === ob.start[i]) {
+			delete ob.end[i];
+			delete ob.start[i];
 		}
 	}
 };
@@ -37,18 +47,26 @@ Tween.prototype.setTarget = function(target) {
 Tween.prototype.tick = function() {
 	if (!this.isComplete()) {
 		this.current_frame++;
-		for (var i in this.end) {
-			this.target[i] = this[this.type](
-				this.current_frame,
-				this.start[i],
-				this.end[i]-this.start[i],
-				this.frames
-			);
+		if (this.end) {
+			this.advanceTarget(this);
+		}
+		for (var i = 0; i<this.targets.length; i++) {
+			this.advanceTarget(this.targets[i]);
 		}
 		if (this.isComplete()) {
 			if (this.callback !== null) this.callback();
 			if (this.repeat) this.reset();
 		}
+	}
+};
+Tween.prototype.advanceTarget = function(ob) {
+	for (var i in ob.end) {
+		ob.target[i] = this[ob.type || this.type](
+			this.current_frame,
+			ob.start[i],
+			ob.end[i]-ob.start[i],
+			this.frames
+		);
 	}
 };
 /**
