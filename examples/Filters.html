@@ -19,44 +19,52 @@
 		<script>
 		var filters = [
 			{
-				attr: '_filterBlur',
-				start: 0,
-				end: 20
+				target: new FilterBlur(0),
+				end: {
+					blur: 20
+				}
 			},
 			{
-				attr: '_filterBrightness',
-				start: 0,
-				end: 5
+				target: new FilterBrightness(0),
+				end: {
+					brightness: 5
+				}
 			},
 			{
-				attr: '_filterContrast',
-				start: 0,
-				end: 5
+				target: new FilterContrast(0),
+				end: {
+					contrast: 5
+				}
 			},
 			{
-				attr: '_filterGrayScale',
-				start: 0,
-				end: 1
+				target: new FilterGrayScale(0),
+				end: {
+					grayscale: 1
+				}
 			},
 			{
-				attr: '_filterHueRotate',
-				start: 0,
-				end: 360
+				target: new FilterHueRotate(0),
+				end: {
+					huerotate: 360
+				}
 			},
 			{
-				attr: '_filterInvert',
-				start: 0,
-				end: 1
+				target: new FilterInvert(0),
+				end: {
+					invert: 1
+				}
 			},
 			{
-				attr: '_filterSaturate',
-				start: 0,
-				end: 5
+				target: new FilterSaturate(0),
+				end: {
+					saturate: 5
+				}
 			},
 			{
-				attr: '_filterSepia',
-				start: 0,
-				end: 1
+				target: new FilterSepia(0),
+				end: {
+					sepia: 1
+				}
 			},
 		],
 		i = 0,
@@ -66,15 +74,12 @@
 			img1: 'assets/album5.jpg'
 		}, function(total, loaded) {
 			if (loaded === total) {
+				_root.addTween(new Tween({
+					repeat: true,
+					frames: 60,
+					targets: filters
+				}));
 				filters.forEach(function(config) {
-					var tween_config = {
-						repeat: true,
-						frames: 60,
-						start: {},
-						end: {}
-					};
-					tween_config.start[config.attr] = config.start;
-					tween_config.end[config.attr] = config.end;
 					_root.addChild(new MovieClip({
 						_width: 200,
 						_height: 200,
@@ -84,13 +89,13 @@
 						_graphicArgs: {
 							image: resources.img1
 						}
-					})).addTween(new Tween(tween_config)).addChild(new MovieClip({
+					})).addFilter(config.target).addChild(new MovieClip({
 						_y: 220,
 						_graphic: 'text',
 						_graphicArgs: {
 							font: '20px Arial',
 							fillStyle: 'white',
-							text: config.attr
+							text: config.target.constructor.name
 						}
 					}));
 					i++;

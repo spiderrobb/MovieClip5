@@ -95,6 +95,17 @@ MovieClip.prototype.addChild = function(mc) {
 	return mc;
 };
 /**
+ * this function removes the mc MovieClip from this MovieClip
+ * @param MovieClip mc MovieClip to remove
+ * @return void
+ */
+MovieClip.prototype.removeChild = function(mc) {
+	this.__children.splice(this.__children.indexOf(mc),1);
+	mc._parent = null;
+	delete this[mc._name];
+	return this;
+};
+/**
  * this function adds the tween to the MovieClip
  * @param Tween tween animation to add
  * @return void
@@ -110,16 +121,6 @@ MovieClip.prototype.addTween = function(tween, key) {
 	tween.setTarget(this);
 	this.__tweens[key] = tween;
 	return this;
-};
-/**
- * this function removes the mc MovieClip from this MovieClip
- * @param MovieClip mc MovieClip to remove
- * @return void
- */
-MovieClip.prototype.removeChild = function(mc) {
-	this.__children.splice(this.__children.indexOf(mc),1);
-	mc._parent = null;
-	delete this[mc._name];
 };
 MovieClip.prototype.trigger = function(type, event, bubble) {
 	if (!bubble) {
