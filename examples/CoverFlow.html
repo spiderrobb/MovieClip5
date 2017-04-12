@@ -20,7 +20,7 @@
 		function CoverFlow(mc, resourcelist) {
 			var self        = this,
 				items       = [],
-				selected    = 0, //Math.ceil(count/2),
+				selected    = 0, 
 				frames      = 30;
 			this.animate = function() {
 				var i, limiter, 
@@ -181,91 +181,7 @@
 				font: "20px Arial"
 			}
 		}));
-		function test() {
-			var circle_d=300, a=.8,w=4,l=15,dw=.98;
-			_root.addChild(new MovieClip({
-				_name: 'rings',
-				_x: 200,
-				_y: 200
-			}));
-			_root.rings.addChild(new MovieClip({
-				_name : 'circle1',
-				_originX: w,
-				_width: circle_d*dw,
-				_height: circle_d,
-				_graphic: 'ellipse',
-				_graphicArgs: {
-					strokeStyle: 'green',
-					lineWidth: l
-				},
-				_alpha: a,
-				onEnterFrame: function() {
-					this._rotation += 1*Math.PI/360;
-				}
-			}));
-			_root.rings.addChild(new MovieClip({
-				_name : 'circle2',
-				_originY: -w,
-				_width: circle_d*dw,
-				_height: circle_d,
-				_graphic: 'ellipse',
-				_graphicArgs: {
-					strokeStyle: 'red',
-					lineWidth: l
-				},
-				_alpha: a,
-				onEnterFrame: function() {
-					this._rotation += 5*Math.PI/360;
-				}
-			}));
-			_root.rings.addChild(new MovieClip({
-				_name : 'circle3',
-				_originX: -w,
-				_width: circle_d*dw,
-				_height: circle_d,
-				_graphic: 'ellipse',
-				_graphicArgs: {
-					strokeStyle: 'blue',
-					lineWidth: l
-				},
-				_alpha: a,
-				onEnterFrame: function() {
-					this._rotation += 4*Math.PI/360;
-				}
-			}));
-			_root.rings.addChild(new MovieClip({
-				_name : 'circle4',
-				_originY: w,
-				_width: circle_d*dw,
-				_height: circle_d,
-				_graphic: 'ellipse',
-				_graphicArgs: {
-					strokeStyle: 'yellow',
-					lineWidth: l
-				},
-				_alpha: a,
-				onEnterFrame: function() {
-					this._rotation += 3*Math.PI/360;
-				}
-			}));
-			_root.rings.addChild(new MovieClip({
-				_name : 'circle5',
-				_originX: w,
-				_width: circle_d*dw,
-				_height: circle_d,
-				_graphic: 'ellipse',
-				_graphicArgs: {
-					strokeStyle: 'white',
-					lineWidth: l
-				},
-				_alpha: a,
-				onEnterFrame: function() {
-					this._rotation += 2*Math.PI/360;
-				}
-			}));
-		}
 		var resources = new ResourceLoader();
-		test();
 		resources.loadImages({
 			img1: 'assets/album1.jpg',
 			img2: 'assets/album2.jpg',
@@ -312,90 +228,3 @@
 		</script>
 	</body>
 </html>
-
-
-
-
-
-
-<!--
-
-this.animate = function() {
-				for (var i = 0; i<count; i++) {
-					if (i == selected) {
-						items[i].addTween(new Tween({
-							target: items[i],
-							frames: frames,
-							type: 'easeInOutSine',
-							end: {
-								_x: mc._width/2,
-								_y: mc._height/2,
-								_scaleX: 2,
-								_scaleY: 2,
-								_skewY: 0,
-								_depth: items.length*2,
-							}
-						}), 'coverflow');
-					} else if (i < selected) {
-						items[i].addTween(new Tween({
-							target: items[i],
-							frames: frames,
-							type: 'easeInOutSine',
-							end: {
-								_x: mc._width/2+(i-selected)*20 - 200,
-								_y: mc._height - 50,
-								_scaleX: .3,
-								_scaleY: 1,
-								_skewY: -15,
-								_depth: i-selected,
-							}
-						}), 'coverflow');
-					} else if (i > selected) {
-						items[i].addTween(new Tween({
-							target: items[i],
-							frames: frames,
-							type: 'easeInOutSine',
-							end: {
-								_x: 200+mc._width/2+(i-selected)*20,
-								_y: mc._height - 50,
-								_scaleX: .3,
-								_scaleY: 1,
-								_skewY: 15,
-								_depth: selected-i
-							}
-						}), 'coverflow');
-					}
-				}
-			};
-
-this.animate = function() {
-				var deg = Math.PI/(2*count),
-					rad = 200;
-				for (var i = 0; i<items.length; i++) {
-					if (i == selected) {
-						items[i].addTween(new Tween({
-							target: items[i],
-							frames: 20,
-							end: {
-								_x: mc._width/2,
-								_y: mc._height/2,
-								_rotation: 0,
-								_scaleX: 1,
-								_scaleY: 1
-							}
-						}));
-					} else {
-						items[i].addTween(new Tween({
-							target: items[i],
-							frames: 20,
-							end: {
-								_x: rad*Math.cos((selected-i)*deg),
-								_y: mc._height + rad*Math.sin((selected-i)*deg),
-								_rotation: (selected-i)*deg,
-								_scaleX: .1,
-								_scaleY: .1
-							}
-						}));
-					}
-				}
-			};

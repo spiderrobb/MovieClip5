@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Photo Editor</title>
+		<script type="text/javascript" src="../build/MovieClip5.min.js"></script>
+		<script type="text/javascript" src="PhotoEditor/PhotoEditor.js"></script>
+		<script type="text/javascript" src="PhotoEditor/ToolBar.js"></script>
+		<script type="text/javascript" src="PhotoEditor/Tools.js"></script>
+		<link href="PhotoEditor/styles.css" rel="stylesheet">
+	</head>
+	<body>
+		<canvas id="canvas-pane"></canvas>
+		<div id="tool-pane">
+			<div class="file-menu">
+				<input type="file" accept="image/*" id="file-input">
+			</div>
+			<div id="tool-bar">
+				<div class="pane-label">Filters Options</div>
+			</div>
+			<div id="filter-pane">
+				<div class="pane-label">Active Filters</div>
+			</div>
+		</div>
+		<script> 
+		var resources = new ResourceLoader();
+		var editor;
+		resources.loadImages({
+			img1: 'assets/album5.jpg'
+		}, function(total, loaded) {
+			if (loaded === total) {
+				editor = new PhotoEditor(resources.img1);
+			}
+		});
+
+		</script>
+	</body>
+</html>

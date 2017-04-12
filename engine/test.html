@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>test</title>
+		<script type="text/javascript" src="../build/MovieClip5.min.js"></script>
+		<script type="text/javascript" src="Engine.js"></script>
+		<style>
+			#canvas1 {
+				position:absolute;
+				top:0px;
+				left:0px;
+				height:100%;
+				width:100%;
+				background-color:#000;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="canvas1"></canvas>
+		<script type="text/javascript">
+			var stage = new Stage('canvas1', {_width:500, _height:500, displayState: 'dynamic', frameRate:36});
+
+			var engine = new Engine();
+			stage.addChild(new MovieClip({
+				_name: 'engine_container',
+				_x: stage._width/2,
+				_y: stage._height-100
+			}));
+			stage.addChild(new MovieClip({
+				_name: 'display_vars',
+				_x: 20,
+				_y: 20,
+				_graphic: 'text',
+				_graphicArgs: {
+					fillStyle: 'white',
+					font: "20px Arial"
+				},
+				onEnterFrame: function() {
+					console.log('onEnterFrame');
+					this._graphicArgs.text = engine.toString();
+				}
+			}));
+			for (var i = -3; i<=3; i++) {
+				for (var j = -3; j<=3; j++) {
+					if (j == -3 || j == 3 || i == -3 || i == 3) {
+						engine.addObject(300*j+75, 300*i+75, 
+							stage.engine_container.addChild(
+								getPerson('green')
+							)
+						);
+					}
+				}
+			}
+			stage.engine_container.addChild(getPerson('blue'));
+			stage.onEnterFrame = function() {
+				engine.tick();
+			};
+			stage.play();
+		</script>
+	</body>
+</html>

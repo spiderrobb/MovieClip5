@@ -1,0 +1,58 @@
+body {
+	background: #fff;
+}
+#canvas-pane {
+	position:absolute;
+	top:0px;
+	left:20%;
+	width:80%;
+	height:100%;
+	background-color:#000;
+}
+#tool-pane {
+	position:absolute;
+	top:0px;
+	left:0px;
+	width:20%;
+	height:100%;
+	overflow:auto;
+}
+.pane-label {
+	padding:5px;
+	margin-bottom:5px;
+	border-bottom:1px solid #eee;
+	overflow:auto;
+}
+#tool-bar {
+	padding:5px;
+	border-bottom:1px solid #aaa;
+}
+.filter-component {
+	margin:5px;
+	border:1px solid #aaa;
+	border-radius: 3px;
+	background:#eee;
+}
+.pane-label a {
+	float:right;
+	cursor:pointer;
+	background-color:#eee;
+	padding:3px;
+	border-radius:5px;
+	display:block;
+	width:10px;
+	height:10px;
+	line-height:10px;
+	text-align:center;
+	border:1px #ccc solid;
+	font-weight:bold;
+	margin-left:3px;
+}
+.pane-label a:hover {
+	background: blue;
+	color:#fff;
+	border-color:darkblue;
+}
+.filter-component input[type="range"]{
+	width:98%;
+}
